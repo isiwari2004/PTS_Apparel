@@ -1,0 +1,507 @@
+﻿@model List<dynamic>
+@{
+    Layout = null;
+    var currentUserRole = Context.Session.GetString("Role") ?? "";
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Screen Privileges</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+            body {
+                display: flex;
+                background: #f4f6f9;
+                margin: 0;
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            }
+
+            .sidebar {
+                width: 250px;
+                background-color: #203455;
+                color: white;
+                min-height: 100vh;
+                padding: 20px;
+                flex-shrink: 0;
+            }
+
+                .sidebar a {
+                    color: #a4b6d4;
+                    text-decoration: none;
+                    display: block;
+                    padding: 10px;
+                    border-radius: 8px;
+                    margin-bottom: 5px;
+                    font-size: 14px;
+                    transition: 0.3s;
+                }
+
+                    .sidebar a:hover, .sidebar a.active {
+                        background: rgba(255,255,255,0.1);
+                        color: white;
+                    }
+
+                .sidebar hr {
+                    border-color: rgba(255,255,255,0.1);
+                }
+
+            .logout-btn {
+                background: rgba(220, 53, 69, 0.2);
+                color: #dc3545 !important;
+            }
+
+                .logout-btn:hover {
+                    background: rgba(220, 53, 69, 0.4) !important;
+                }
+
+            .content {
+                flex: 1;
+                padding: 30px;
+                overflow-x: auto;
+            }
+
+            .top-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 25px;
+            }
+
+            .page-title h4 {
+                font-weight: 600;
+                color: #222;
+                margin: 0;
+            }
+
+            .page-title p {
+                font-size: 13px;
+                color: #888;
+                margin: 0;
+            }
+
+            .btn-save {
+                background: #203455;
+                color: white;
+                border-radius: 8px;
+                padding: 8px 20px;
+                font-size: 14px;
+                font-weight: 500;
+                border: none;
+            }
+
+                .btn-save:hover {
+                    background: #15263f;
+                    color: white;
+                }
+
+            .filter-bar {
+                display: flex;
+                gap: 15px;
+                margin-bottom: 20px;
+                flex-wrap: wrap;
+            }
+
+            .filter-input {
+                border: 1px solid #e0e0e0;
+                border-radius: 8px;
+                padding: 8px 15px;
+                font-size: 14px;
+                background: white;
+                outline: none;
+            }
+
+            .filter-badge {
+                color: #555;
+                font-size: 13px;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+
+            .legend {
+                display: flex;
+                justify-content: space-between;
+                font-size: 12px;
+                color: #666;
+                margin-bottom: 15px;
+                padding: 0 5px;
+            }
+
+            .legend-right span {
+                margin-left: 15px;
+            }
+
+            .legend-right .green-dot {
+                color: #2ecc71;
+            }
+
+            .legend-right .grey-dot {
+                color: #ccc;
+            }
+
+            .permission-grid {
+                background: white;
+                border-radius: 12px;
+                padding: 0;
+                box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+                border: 1px solid #eef2f6;
+            }
+
+            .grid-header {
+                display: flex;
+                border-radius: 12px 12px 0 0;
+                overflow: hidden;
+            }
+
+            .header-module {
+                background: #203455;
+                color: white;
+                width: 20%;
+                padding: 20px;
+                display: flex;
+                align-items: center;
+                font-weight: 600;
+                font-size: 14px;
+            }
+
+            .header-role {
+                background: #2563a0;
+                color: white;
+                width: 26.66%;
+                padding: 15px 10px;
+                text-align: center;
+                border-left: 1px solid rgba(255,255,255,0.1);
+            }
+
+                .header-role h6 {
+                    font-size: 13px;
+                    font-weight: 600;
+                    margin: 0 0 10px 0;
+                }
+
+                .header-role .action-letters {
+                    display: flex;
+                    justify-content: center;
+                    gap: 18px;
+                    font-size: 11px;
+                    color: rgba(255,255,255,0.6);
+                    letter-spacing: 1px;
+                }
+
+            .grid-row {
+                display: flex;
+                border-bottom: 1px solid #eef2f6;
+                transition: 0.2s;
+            }
+
+                .grid-row:last-child {
+                    border-bottom: none;
+                    border-radius: 0 0 12px 12px;
+                }
+
+                .grid-row:hover {
+                    background: #f8faff;
+                }
+
+            .row-module {
+                width: 20%;
+                padding: 20px;
+                display: flex;
+                align-items: center;
+                font-weight: 500;
+                font-size: 14px;
+                color: #333;
+            }
+
+                .row-module i {
+                    color: #203455;
+                    font-size: 16px;
+                    margin-right: 12px;
+                    background: #eef4ff;
+                    padding: 8px;
+                    border-radius: 8px;
+                    width: 32px;
+                    text-align: center;
+                }
+
+            .row-role {
+                width: 26.66%;
+                padding: 15px 10px;
+                display: flex;
+                justify-content: center;
+                gap: 12px;
+            }
+
+            .perm-box {
+                width: 32px;
+                height: 32px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border-radius: 8px;
+                font-size: 12px;
+                font-weight: 600;
+                cursor: pointer;
+                transition: 0.2s;
+            }
+
+            .perm-active {
+                border: 1px solid #2ecc71;
+                color: #27ae60;
+                background: #eafaf1;
+            }
+
+            .perm-inactive {
+                border: 1px solid #e0e0e0;
+                color: #ccc;
+                background: #fafafa;
+            }
+
+            .grid-footer {
+                padding: 15px 20px;
+                border-top: 1px solid #eef2f6;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                font-size: 13px;
+                color: #555;
+                background: #fcfcfd;
+                border-radius: 0 0 12px 12px;
+            }
+
+            .stats {
+                display: flex;
+                gap: 20px;
+            }
+
+            .progress {
+                width: 80px;
+                height: 5px;
+                background: #e9ecef;
+                border-radius: 5px;
+                overflow: hidden;
+            }
+
+            .progress-bar-custom {
+                height: 100%;
+                background: #203455;
+            }
+
+            .progress-bar-super {
+                height: 100%;
+                background: #2563a0;
+            }
+
+            .progress-bar-user {
+                height: 100%;
+                background: #b0b0b0;
+            }
+
+            @@media (max-width: 1024px) {
+                .header-module, .row-module {
+                    width: 25%;
+                }
+
+                .header-role, .row-role {
+                    width: 25%;
+                }
+            }
+
+            @@media (max-width: 768px) {
+                .sidebar {
+                    display: none;
+                }
+
+                .grid-header {
+                    display: none;
+                }
+
+                .grid-row {
+                    flex-wrap: wrap;
+                    border: 1px solid #eee;
+                    margin-bottom: 10px;
+                    border-radius: 8px;
+                }
+
+                .row-module {
+                    width: 100%;
+                    border-bottom: 1px solid #eee;
+                }
+
+                .row-role {
+                    width: 33.33%;
+                    border-right: 1px solid #eee;
+                }
+
+                    .row-role:last-child {
+                        border-right: none;
+                    }
+            }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <h5><i class="fas fa-cut" style="color:#27ae60;"></i> ApparelPTS</h5>
+        <hr>
+        <a href="/Home/Dashboard"><i class="fas fa-th-large"></i> Dashboard</a>
+        <a href="/Factory/Index"><i class="fas fa-industry"></i> Factory</a>
+        <a href="/Customer/Index"><i class="fas fa-user-friends"></i> Customer</a>
+        <a href="/Style/Index"><i class="fas fa-tshirt"></i> Style</a>
+        <a href="/POManagement/Index"><i class="fas fa-file-invoice"></i> PO</a>
+        <a href="#"><i class="fas fa-clipboard-list"></i> Input Recorder</a>
+        <a href="/Forecast/Index"><i class="fas fa-chart-line"></i> Forecast</a>
+        <a href="#"><i class="fas fa-list-ul"></i> Line Recorder</a>
+        <a href="#"><i class="fas fa-clock"></i> Hourly Tracking</a>
+        <a href="#"><i class="fas fa-exclamation-triangle"></i> Defect Report</a>
+        @if (Context.Session.GetString("Role") == "Admin")
+        {
+            <a href="/Home/ScreenPrivileges" class="active"><i class="fas fa-lock"></i> Screen Privileges</a>
+            <a href="/User/Register"><i class="fas fa-user-plus"></i> User Register</a>
+        }
+        <hr>
+        <a href="/Account/Logout" class="text-danger"><i class="fas fa-sign-out-alt"></i> Logout</a>
+    </div>
+
+    <div class="content">
+        <div class="top-header">
+            <div class="page-title">
+                <h4>Screen Privileges</h4>
+                <p>Manage role-based access permissions for all modules and screens.</p>
+            </div>
+            <button class="btn-save" onclick="savePermissions()"><i class="fas fa-save me-2"></i> Save Changes</button>
+        </div>
+
+        <div class="filter-bar">
+            <select class="filter-input" style="width: 180px; appearance: none;"><option>Select Department</option></select>
+            <div class="filter-input" style="display: flex; align-items: center; gap: 10px; width: 300px;">
+                <i class="fas fa-search text-muted"></i>
+                <input type="text" style="border: none; outline: none; width: 100%;" placeholder="Search...">
+            </div>
+            <div class="filter-badge ms-auto">
+                <span><i class="fas fa-users"></i> 3 Roles</span>
+                <span><i class="fas fa-th-large"></i> 9 Screens</span>
+                <span><i class="fas fa-check-circle text-success"></i> 79 Granted</span>
+            </div>
+        </div>
+
+        <div class="legend">
+            <div>
+                <i class="far fa-circle"></i> Permission Legend: &nbsp;
+                <span><i class="fas fa-check-circle text-success"></i> V = View</span>
+                <span><i class="fas fa-plus-circle text-success"></i> A = Add</span>
+                <span><i class="fas fa-pen text-success"></i> E = Edit</span>
+                <span><i class="fas fa-trash text-success"></i> D = Delete</span>
+            </div>
+            <div class="legend-right">
+                <span class="green-dot"><i class="fas fa-check-circle"></i> Granted</span>
+                <span class="grey-dot"><i class="far fa-circle"></i> Denied</span>
+            </div>
+        </div>
+
+        <div class="permission-grid">
+            <div class="grid-header">
+                <div class="header-module"><i class="fas fa-table me-2"></i> Screen Module</div>
+                <div class="header-role"><h6><i class="fas fa-user-circle me-1"></i> Admin</h6><div class="action-letters"><span>V</span><span>A</span><span>E</span><span>D</span></div></div>
+                <div class="header-role"><h6><i class="fas fa-user-circle me-1"></i> Super User</h6><div class="action-letters"><span>V</span><span>A</span><span>E</span><span>D</span></div></div>
+                <div class="header-role"><h6><i class="fas fa-user-circle me-1"></i> User</h6><div class="action-letters"><span>V</span><span>A</span><span>E</span><span>D</span></div></div>
+            </div>
+
+            @foreach (var module in Model)
+            {
+                <div class="grid-row" data-module="@module.ModuleName">
+                    <div class="row-module">
+                        <i class="fas fa-building"></i> @module.ModuleName
+                    </div>
+
+                    <!-- Admin Icons - Direct Access (NO INDEXING) -->
+                    <div class="row-role" data-role="Admin">
+                        <div class="perm-box @(module.Admin.V ? "perm-active" : "perm-inactive")" data-type="V" onclick="togglePerm(this)">V</div>
+                        <div class="perm-box @(module.Admin.A ? "perm-active" : "perm-inactive")" data-type="A" onclick="togglePerm(this)">A</div>
+                        <div class="perm-box @(module.Admin.E ? "perm-active" : "perm-inactive")" data-type="E" onclick="togglePerm(this)">E</div>
+                        <div class="perm-box @(module.Admin.D ? "perm-active" : "perm-inactive")" data-type="D" onclick="togglePerm(this)">D</div>
+                    </div>
+
+                    <!-- Super User Icons - Direct Access -->
+                    <div class="row-role" data-role="Super User">
+                        <div class="perm-box @(module.SuperUser.V ? "perm-active" : "perm-inactive")" data-type="V" onclick="togglePerm(this)">V</div>
+                        <div class="perm-box @(module.SuperUser.A ? "perm-active" : "perm-inactive")" data-type="A" onclick="togglePerm(this)">A</div>
+                        <div class="perm-box @(module.SuperUser.E ? "perm-active" : "perm-inactive")" data-type="E" onclick="togglePerm(this)">E</div>
+                        <div class="perm-box @(module.SuperUser.D ? "perm-active" : "perm-inactive")" data-type="D" onclick="togglePerm(this)">D</div>
+                    </div>
+
+                    <!-- User Icons - Direct Access -->
+                    <div class="row-role" data-role="User">
+                        <div class="perm-box @(module.User.V ? "perm-active" : "perm-inactive")" data-type="V" onclick="togglePerm(this)">V</div>
+                        <div class="perm-box @(module.User.A ? "perm-active" : "perm-inactive")" data-type="A" onclick="togglePerm(this)">A</div>
+                        <div class="perm-box @(module.User.E ? "perm-active" : "perm-inactive")" data-type="E" onclick="togglePerm(this)">E</div>
+                        <div class="perm-box @(module.User.D ? "perm-active" : "perm-inactive")" data-type="D" onclick="togglePerm(this)">D</div>
+                    </div>
+                </div>
+            }
+
+            <div class="grid-footer">
+                <div class="stats">
+                    <span><i class="far fa-circle text-dark"></i> Admin <div class="progress"><div class="progress-bar-custom" style="width: 100%;"></div></div> 36/36</span>
+                    <span><i class="far fa-circle text-primary"></i> Super User <div class="progress"><div class="progress-bar-super" style="width: 83%;"></div></div> 30/36</span>
+                    <span><i class="far fa-circle text-secondary"></i> User <div class="progress"><div class="progress-bar-user" style="width: 36%;"></div></div> 13/36</span>
+                </div>
+                <div>Showing 9 of 9 screens</div>
+            </div>
+        </div>
+    </div>
+
+    
+    <script>
+            function togglePerm(element) {
+                if (element.classList.contains("perm-active")) {
+                    element.classList.remove("perm-active");
+                    element.classList.add("perm-inactive");
+                } else {
+                    element.classList.remove("perm-inactive");
+                    element.classList.add("perm-active");
+                }
+            }
+
+            function savePermissions() {
+                var permissions = [];
+                var rows = document.querySelectorAll(".grid-row");
+
+                rows.forEach(row => {
+                    var moduleName = row.getAttribute("data-module");
+                    var roleColumns = row.querySelectorAll(".row-role");
+
+                    roleColumns.forEach(col => {
+                        var role = col.getAttribute("data-role");
+                        var boxes = col.querySelectorAll(".perm-box");
+
+                        permissions.push({
+                            ModuleName: moduleName,
+                            Role: role,
+                            CanView: boxes[0].classList.contains("perm-active"),
+                            CanAdd: boxes[1].classList.contains("perm-active"),
+                            CanEdit: boxes[2].classList.contains("perm-active"),
+                            CanDelete: boxes[3].classList.contains("perm-active")
+                        });
+                    });
+                });
+
+                fetch("/Home/SavePermissions", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(permissions)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(data.message);
+                        location.reload();
+                    } else {
+                        alert("Error: " + data.message);
+                    }
+                })
+                .catch(error => alert("Connection error. Please try again."));
+            }
+    </script>
+</body>
+</html>

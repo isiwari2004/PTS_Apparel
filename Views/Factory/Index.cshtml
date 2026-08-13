@@ -1,0 +1,616 @@
+﻿@model List<PTS_Apparel.Models.Factory>
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Factory Management - ApparelPTS</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+            body {
+                display: flex;
+                background: #f4f6f9;
+                margin: 0;
+                font-family: 'Segoe UI';
+            }
+
+            .sidebar {
+                width: 250px;
+                background-color: #1e3250;
+                color: white;
+                min-height: 100vh;
+                padding: 20px;
+                flex-shrink: 0;
+            }
+
+                .sidebar a {
+                    color: #a4b6d4;
+                    text-decoration: none;
+                    display: block;
+                    padding: 10px;
+                    border-radius: 5px;
+                    margin-bottom: 5px;
+                    transition: 0.3s;
+                }
+
+                    .sidebar a:hover, .sidebar a.active {
+                        background: rgba(255,255,255,0.1);
+                        color: white;
+                    }
+
+            .green-icon {
+                color: #2ecc71;
+            }
+
+            .sidebar hr {
+                border-color: rgba(255,255,255,0.1);
+            }
+
+            .content {
+                flex: 1;
+                padding: 30px;
+            }
+
+            .page-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: flex-start;
+                margin-bottom: 25px;
+            }
+
+            .page-title h4 {
+                font-weight: 700;
+                color: #222;
+                margin: 0;
+            }
+
+            .page-title p {
+                color: #777;
+                font-size: 14px;
+                margin: 5px 0 0 0;
+            }
+
+            .search-bar {
+                background: white;
+                padding: 15px;
+                border-radius: 10px;
+                border: 1px solid #eef2f6;
+                display: flex;
+                flex-wrap: wrap;
+                gap: 15px;
+                margin-bottom: 25px;
+                align-items: center;
+            }
+
+            .search-input {
+                background: #f8f9fa;
+                border: 1px solid #eef2f6;
+                border-radius: 8px;
+                padding: 8px 15px;
+                flex: 1;
+                min-width: 200px;
+                outline: none;
+            }
+
+                .search-input:focus {
+                    border-color: #203455;
+                }
+
+            .btn-dark-custom {
+                background-color: #203455;
+                color: white;
+                border: none;
+                border-radius: 6px;
+                padding: 8px 16px;
+                transition: 0.3s;
+            }
+
+                .btn-dark-custom:hover {
+                    background-color: #14263f;
+                    color: white;
+                }
+
+            .btn-outline-custom {
+                border: 1px solid #ced4da;
+                background: white;
+                border-radius: 6px;
+                padding: 7px 15px;
+                color: #555;
+                transition: 0.3s;
+            }
+
+                .btn-outline-custom:hover {
+                    background: #f8f9fa;
+                }
+
+            .add-btn {
+                display: flex;
+                align-items: center;
+                gap: 5px;
+                margin-left: auto;
+                cursor: pointer;
+            }
+
+            .table-container {
+                background: white;
+                border-radius: 12px;
+                border: 1px solid #eef2f6;
+                overflow: hidden;
+                box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+            }
+
+            .custom-table {
+                width: 100%;
+                border-collapse: collapse;
+                font-size: 14px;
+            }
+
+                .custom-table thead {
+                    background:#1F3A5F;
+                    border-bottom: 1px solid #eef2f6;
+                }
+
+                .custom-table th {
+                    text-align: left;
+                    padding: 15px 20px;
+                    color: #eef2f6;
+                    font-weight: 600;
+                    text-transform: uppercase;
+                    font-size: 11px;
+                    letter-spacing: 0.5px;
+                }
+
+                .custom-table td {
+                    padding: 20px;
+                    border-bottom: 1px solid #f1f4f8;
+                    color: #333;
+                }
+
+                .custom-table tr:last-child td {
+                    border-bottom: none;
+                }
+
+            .code-badge {
+                background: #eef2f7;
+                color: #333;
+                font-weight: 700;
+                padding: 4px 10px;
+                border-radius: 5px;
+                font-size: 12px;
+            }
+
+            .line-badge {
+                background: #e3edfb;
+                color: #1e6bb8;
+                font-weight: 700;
+                border-radius: 20px;
+                padding: 3px 12px;
+                display: inline-block;
+            }
+
+            .action-icons a {
+                color: #778ca2;
+                margin: 0 5px;
+                transition: 0.2s;
+                text-decoration: none;
+                cursor: pointer;
+            }
+
+                .action-icons a:hover {
+                    color: #203455;
+                }
+
+                .action-icons a.btn-delete:hover {
+                    color: #dc3545;
+                }
+
+            .modal-header {
+                background: #f8fafc;
+                border-bottom: 1px solid #eef2f6;
+            }
+
+            .modal-footer {
+                border-top: 1px solid #eef2f6;
+            }
+
+            @@media (max-width: 768px) {
+                .sidebar {
+                    display: none;
+                }
+
+                .add-btn {
+                    margin-left: 0;
+                    width: 100%;
+                }
+            }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <h5><i class="fas fa-cut green-icon"></i> ApparelPTS</h5>
+        <hr>
+        <a href="/Home/Dashboard"><i class="fas fa-th-large"></i> Dashboard</a>
+        <a href="/Factory/Index" class="active"><i class="fas fa-industry"></i> Factory</a>
+        <a href="/Customer/Index"><i class="fas fa-user-friends"></i> Customer</a>
+        <a href="/Style/Index"><i class="fas fa-tshirt"></i> Style</a>
+        <a href="#"><i class="fas fa-file-invoice"></i> PO</a>
+        <a href="/InputRecorder/Index"><i class="fas fa-clipboard-list"></i> Input Recorder</a>
+        <a href="/Forecast/Index"><i class="fas fa-chart-line"></i> Forecast</a>
+        <a href="#"><i class="fas fa-list-ul"></i> Line Recorder</a>
+        <a href="#"><i class="fas fa-clock"></i> Hourly Tracking</a>
+        <a href="#"><i class="fas fa-exclamation-triangle"></i> Defect Report</a>
+        @if (Context.Session.GetString("Role") == "Admin")
+        {
+            <a href="/Home/ScreenPrivileges"><i class="fas fa-lock"></i> Screen Privileges</a>
+            <a href="/User/Register"><i class="fas fa-user-plus"></i> User Register</a>
+        }
+        <hr>
+        <a href="/Account/Logout" class="text-danger"><i class="fas fa-sign-out-alt"></i> Logout</a>
+    </div>
+
+    <div class="content">
+        <div class="page-header">
+            <div class="page-title">
+                <h4>Factory Management</h4>
+                <p>Manage apparel manufacturing factories and production line configurations.</p>
+            </div>
+        </div>
+
+        <div class="search-bar">
+            <div class="input-group" style="flex: 1; min-width: 200px;">
+                <span class="input-group-text bg-light border-end-0" style="background:#f8f9fa; border-color:#eef2f6;"><i class="fas fa-search text-muted"></i></span>
+                <input type="text" id="searchInput" class="form-control border-start-0 bg-light" style="background:#f8f9fa; border-color:#eef2f6;" placeholder="Search factories...">
+            </div>
+            <button class="btn-dark-custom" onclick="searchFactories()">Search</button>
+            <button class="btn-outline-custom" onclick="location.reload()"><i class="fas fa-sync-alt me-1"></i> Refresh</button>
+
+            
+            @if (ViewBag.CanAddFactory != null && ViewBag.CanAddFactory == true)
+            {
+                <button class="btn-dark-custom add-btn" data-bs-toggle="modal" data-bs-target="#addFactoryModal">
+                    <i class="fas fa-plus"></i> Add Factory
+                </button>
+            }
+        </div>
+
+        <div class="table-container">
+            <table class="custom-table">
+                <thead>
+                    <tr>
+                        <th style="width: 15%;">FACTORY CODE</th>
+                        <th style="width: 35%;">FACTORY NAME</th>
+                        <th style="width: 15%;">WORKING HOURS</th>
+                        <th style="width: 15%;">PROD. LINES</th>
+
+                        
+                        @if ((ViewBag.CanEditFactory != null && ViewBag.CanEditFactory == true) ||
+                             (ViewBag.CanDeleteFactory != null && ViewBag.CanDeleteFactory == true))
+                        {
+                            <th style="width: 20%; text-align: right; padding-right: 30px;">ACTIONS</th>
+                        }
+                    </tr>
+                </thead>
+                <tbody id="factoryTableBody">
+                    @if (Model != null && Model.Count > 0)
+                    {
+                        @foreach (var factory in Model)
+                        {
+                            <tr id="row-@factory.Id">
+                                <td><span class="code-badge">@factory.FactoryCode</span></td>
+                                <td><strong>@factory.FactoryName</strong></td>
+                                <td>@factory.WorkingHours</td>
+                                <td><span class="line-badge">@factory.ProdLines</span></td>
+
+                                @if ((ViewBag.CanEditFactory != null && ViewBag.CanEditFactory == true) ||
+                                                                     (ViewBag.CanDeleteFactory != null && ViewBag.CanDeleteFactory == true))
+                                {
+                                    <td style="text-align: right; padding-right: 30px;">
+                                        <div class="action-icons">
+                                            @if (ViewBag.CanEditFactory != null && ViewBag.CanEditFactory == true)
+                                            {
+                                                <a class="btn-edit" onclick="openEditModal(@factory.Id)"><i class="fas fa-pen"></i></a>
+                                            }
+
+                                            @if (ViewBag.CanDeleteFactory != null && ViewBag.CanDeleteFactory == true)
+                                            {
+                                                <a class="btn-delete" onclick="deleteFactory(@factory.Id)"><i class="fas fa-trash-alt"></i></a>
+                                            }
+                                        </div>
+                                    </td>
+                                }
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr id="noDataRow">
+                            <td colspan="5" class="text-center py-4 text-muted">
+                                <i class="fas fa-building me-2"></i> No factories found.
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    
+    <div class="modal fade" id="addFactoryModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-plus-circle me-2 text-success"></i>Add New Factory</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addFactoryForm">
+                        <div class="row g-3">
+                            <!-- Factory Code & Name -->
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Factory Code <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control bg-light" name="FactoryCode" placeholder="e.g. CAL" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Factory Name <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" name="FactoryName" placeholder="e.g. Concord Apparel" required>
+                            </div>
+
+                            <!-- Working Hours & Cycle Time (with min) -->
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Working Hours <span class="text-danger">*</span></label>
+                                <input type="number" class="form-control" name="WorkingHours" placeholder="9" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Cycle Time <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <input type="number" step="0.01" class="form-control" name="CycleTime" placeholder="60.00" required>
+                                    <span class="input-group-text bg-white"><strong>min</strong></span>
+                                </div>
+                            </div>
+
+                            <!-- Number of Production Lines & Regenerate -->
+                            <div class="col-12">
+                                <label class="form-label fw-bold">Number of Production Lines <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control" id="add_ProdLines" name="ProdLines" placeholder="10" required oninput="generateLines('add')">
+                                    <button class="btn btn-outline-secondary" type="button" onclick="generateLines('add')"><i class="fas fa-sync-alt me-1"></i> Regenerate</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Dynamic Lines Container -->
+                        <div class="row g-3 mt-3" id="add_lines_container">
+                            <!-- Lines will be generated here -->
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-dark-custom" onclick="saveFactory('add')"><i class="fas fa-save me-2"></i> Save Factory</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============= EDIT FACTORY MODAL ============= -->
+    <div class="modal fade" id="editFactoryModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-edit me-2 text-primary"></i>Edit Factory</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editFactoryForm">
+                        <input type="hidden" id="edit_Id" name="Id">
+                        <div class="row g-3">
+                            <!-- Factory Code & Name -->
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Factory Code <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control bg-light" id="edit_FactoryCode" name="FactoryCode" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Factory Name <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="edit_FactoryName" name="FactoryName" required>
+                            </div>
+
+                            <!-- Working Hours & Cycle Time (with min) -->
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Working Hours <span class="text-danger">*</span></label>
+                                <input type="number" class="form-control" id="edit_WorkingHours" name="WorkingHours" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Cycle Time <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <input type="number" step="0.01" class="form-control" id="edit_CycleTime" name="CycleTime" required>
+                                    <span class="input-group-text bg-white"><strong>min</strong></span>
+                                </div>
+                            </div>
+
+                            <!-- Number of Production Lines & Regenerate -->
+                            <div class="col-12">
+                                <label class="form-label fw-bold">Number of Production Lines <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control" id="edit_ProdLines" name="ProdLines" required oninput="generateLines('edit')">
+                                    <button class="btn btn-outline-secondary" type="button" onclick="generateLines('edit')"><i class="fas fa-sync-alt me-1"></i> Regenerate</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Dynamic Lines Container -->
+                        <div class="row g-3 mt-3" id="edit_lines_container">
+                            <!-- Lines will be generated here -->
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-dark-custom" onclick="saveFactory('edit')"><i class="fas fa-save me-2"></i> Update Factory</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============= SCRIPTS ============= -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // 1. Save Function (Add & Edit)
+        function saveFactory(mode) {
+        var formId = mode === 'add' ? 'addFactoryForm' : 'editFactoryForm';
+        var url = mode === 'add' ? '/Factory/Create' : '/Factory/Edit';
+        var form = document.getElementById(formId);
+        var formData = new FormData(form);
+
+        fetch(url, {
+        method: "POST",
+        body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+        if (data.success) {
+        alert(data.message);
+        location.reload();
+        } else {
+        alert("Error: " + data.message);
+        }
+        })
+        .catch(error => { alert("An error occurred. Please try again."); });
+        }
+
+        // 2. Open Edit Modal & Load Data
+        function openEditModal(id) {
+        fetch(`/Factory/Edit?id=${id}`)
+        .then(response => response.json())
+        .then(data => {
+        if (data.success) {
+        document.getElementById('edit_Id').value = data.data.id;
+        document.getElementById('edit_FactoryCode').value = data.data.factoryCode;
+        document.getElementById('edit_FactoryName').value = data.data.factoryName;
+        document.getElementById('edit_WorkingHours').value = data.data.workingHours;
+        document.getElementById('edit_CycleTime').value = data.data.cycleTime;
+        document.getElementById('edit_ProdLines').value = data.data.prodLines;
+
+        // Generate lines for edit modal
+        generateLines('edit');
+
+        var myModal = new bootstrap.Modal(document.getElementById('editFactoryModal'));
+        myModal.show();
+        } else {
+        alert("Error: " + data.message);
+        }
+        })
+        .catch(error => { alert("Failed to load factory data."); });
+        }
+
+        // 3. Delete Factory
+        function deleteFactory(id) {
+        if (confirm("Are you sure you want to delete this factory? This action cannot be undone.")) {
+        var formData = new FormData();
+        formData.append('id', id);
+
+        fetch("/Factory/Delete", {
+        method: "POST",
+        body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+        if (data.success) {
+        alert(data.message);
+        location.reload();
+        } else {
+        alert("Error: " + data.message);
+        }
+        })
+        .catch(error => { alert("An error occurred while deleting."); });
+        }
+        }
+
+        // 4. Search Factories
+        function searchFactories() {
+        var searchTerm = document.getElementById('searchInput').value.trim();
+
+        fetch(`/Factory/Search?searchTerm=${encodeURIComponent(searchTerm)}`)
+        .then(response => response.json())
+        .then(data => {
+        var tbody = document.getElementById('factoryTableBody');
+        tbody.innerHTML = '';
+
+        if (data.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" class="text-center py-4 text-muted">No factories found.</td></tr>`;
+        } else {
+        data.forEach(f => {
+        var row = `
+        <tr id="row-${f.id}">
+        <td><span class="code-badge">${f.factoryCode}</span></td>
+        <td><strong>${f.factoryName}</strong></td>
+        <td>${f.workingHours}</td>
+        <td><span class="line-badge">${f.prodLines}</span></td>
+        <td style="text-align: right; padding-right: 30px;">
+        <div class="action-icons">
+        <a class="btn-edit" onclick="openEditModal(${f.id})"><i class="fas fa-pen"></i></a>
+        <a class="btn-delete" onclick="deleteFactory(${f.id})"><i class="fas fa-trash-alt"></i></a>
+        </div>
+        </td>
+        </tr>
+        `;
+        tbody.innerHTML += row;
+        });
+        }
+        })
+        .catch(error => { alert("Search failed."); });
+        }
+
+        
+        function generateLines(mode) {
+        var containerId = mode === 'add' ? 'add_lines_container' : 'edit_lines_container';
+        var inputId = mode === 'add' ? 'add_ProdLines' : 'edit_ProdLines';
+        var container = document.getElementById(containerId);
+        var count = parseInt(document.getElementById(inputId).value);
+
+        container.innerHTML = ''; 
+
+        if (isNaN(count) || count <= 0) return;
+
+        
+        var options = ['Default-1', 'Default-2', 'Default-3', 'Default-4', 'Default-5', 'Custom-1', 'Custom-2'];
+
+        for (var i = 1; i <= count; i++) {
+        var col = document.createElement('div');
+        col.className = 'col-md-6'; 
+
+        var label = document.createElement('label');
+        label.className = 'form-label text-muted small fw-bold';
+        var lineNum = i < 10 ? '0' + i : i;
+        label.innerText = 'Line ' + lineNum;
+
+        var input = document.createElement('input');
+        input.className = 'form-control';
+        input.type = 'text';
+        input.placeholder = 'Type or select line name';
+        input.name = 'Line_' + i;
+        input.required = true; 
+        input.setAttribute('list', 'lineOptions_' + mode + '_' + i); 
+        input.autocomplete = 'off';
+
+        
+        var datalist = document.createElement('datalist');
+        datalist.id = 'lineOptions_' + mode + '_' + i;
+
+        
+        options.forEach(opt => {
+        var option = document.createElement('option');
+        option.value = opt;
+        datalist.appendChild(option);
+        });
+
+        col.appendChild(label);
+        col.appendChild(input);
+        col.appendChild(datalist);
+        container.appendChild(col);
+        }
+        }
+    </script>
+</body>
+</html>

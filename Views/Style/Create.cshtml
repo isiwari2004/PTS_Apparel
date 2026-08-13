@@ -1,0 +1,309 @@
+﻿@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add Style</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+            body {
+                background: #f4f6f9;
+                margin: 0;
+                padding: 20px;
+                font-family: 'Segoe UI';
+            }
+
+            .back-btn {
+                color: #203455;
+                text-decoration: none;
+                margin-bottom: 15px;
+                display: inline-block;
+            }
+
+            .main-card {
+                background: white;
+                border-radius: 12px;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+                display: flex;
+                flex-wrap: wrap;
+                overflow: hidden;
+                max-width: 1200px;
+                margin: 0 auto;
+            }
+
+            /* Left Side - Form */
+            .form-section {
+                padding: 30px;
+                width: 50%;
+                border-right: 1px solid #eef2f6;
+            }
+
+                .form-section h5 {
+                    font-weight: 600;
+                    color: #222;
+                    margin-bottom: 20px;
+                }
+
+            .form-label {
+                font-weight: 600;
+                font-size: 14px;
+                color: #222;
+            }
+
+            /* Sizes Input */
+            .size-input-group {
+                display: flex;
+                gap: 10px;
+            }
+
+                .size-input-group input {
+                    flex: 1;
+                }
+
+            /* Right Side - Preview */
+            .preview-section {
+                padding: 30px;
+                width: 50%;
+                background: #fbfbfd;
+                display: flex;
+                flex-direction: column;
+            }
+
+            .preview-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 20px;
+            }
+
+                .preview-header h5 {
+                    font-weight: 600;
+                    color: #222;
+                    margin: 0;
+                }
+
+            .preview-table {
+                background: white;
+                border-radius: 8px;
+                border: 1px solid #eef2f6;
+            }
+
+                .preview-table th {
+                    background: #f8fafc;
+                    padding: 12px 15px;
+                    font-weight: 600;
+                    font-size: 13px;
+                    color: #666;
+                }
+
+                .preview-table td {
+                    padding: 12px 15px;
+                    border-top: 1px solid #eef2f6;
+                }
+
+            .empty-state {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                color: #999;
+            }
+
+                .empty-state i {
+                    font-size: 50px;
+                    color: #d1d5db;
+                    margin-bottom: 15px;
+                }
+
+            .btn-custom-save {
+                background: #203455;
+                color: white;
+                border-radius: 6px;
+                padding: 8px 25px;
+                border: none;
+            }
+
+                .btn-custom-save:hover {
+                    background: #14263f;
+                    color: white;
+                }
+
+            .btn-upload {
+                background: #2ecc71;
+                color: white;
+                border: none;
+                padding: 8px 20px;
+                border-radius: 6px;
+            }
+
+                .btn-upload:hover {
+                    background: #27ae60;
+                    color: white;
+                }
+    </style>
+</head>
+<body>
+    <div style="max-width: 1200px; margin: 0 auto;">
+        <a href="/Style/Index" class="back-btn"><i class="fas fa-arrow-left me-2"></i> Back to Style Management</a>
+
+        <div class="main-card">
+            <!-- Left: Form -->
+            <div class="form-section">
+                <div class="d-flex align-items-center gap-2 mb-3">
+                    <div style="background:#e3edfb; color:#1e6bb8; width:40px; height:40px; border-radius:8px; display:flex; justify-content:center; align-items:center;">
+                        <i class="fas fa-tshirt"></i>
+                    </div>
+                    <div>
+                        <h5 style="margin:0;">Add Style</h5>
+                        <p style="color:#777; font-size:13px; margin:0;">Create a new apparel style and manage available sizes</p>
+                    </div>
+                </div>
+                <hr>
+
+                <form id="addStyleForm">
+                    <div class="mb-3">
+                        <label class="form-label">Customer</label>
+                        <select class="form-control" name="CustomerName" id="custName" required>
+                            <option value="">Select customer</option>
+                            <option value="Blaklader">Blaklader</option>
+                            <option value="Concord Apparel">Concord Apparel</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Style</label>
+                        <input type="text" class="form-control" name="StyleCode" id="styleCode" placeholder="Enter style name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Colour</label>
+                        <input type="text" class="form-control" name="ColorCode" id="colorCode" placeholder="Enter colour" required>
+                    </div>
+
+                    <!-- Sizes Section: Remove Search Button, Only Add Button -->
+                    <div class="mb-3">
+                        <label class="form-label">Sizes</label>
+                        <div class="size-input-group">
+                            <input type="text" class="form-control" id="sizeInput" placeholder="Type size and click Add (e.g., S, M, XL)">
+                            <button type="button" class="btn btn-dark" onclick="addSize()">Add</button>
+                        </div>
+                        <input type="hidden" id="finalSizes" name="Sizes" />
+                    </div>
+
+                    <div class="mt-3">
+                        <button type="button" class="btn btn-secondary w-100" style="border:1px dashed #ccc; background:transparent; color:#666; padding:15px;">
+                            <i class="fas fa-cloud-upload-alt me-2"></i> Drag & drop file here or click to browse (Optional)
+                        </button>
+                    </div>
+
+                    <div class="d-flex gap-3 mt-4">
+                        <button type="button" class="btn-upload"><i class="fas fa-upload me-2"></i> Upload</button>
+                        <button type="button" class="btn btn-outline-secondary" onclick="window.location.href='/Style/Index'">Cancel</button>
+                        <button type="button" class="btn-custom-save" onclick="saveStyle()"><i class="fas fa-save me-2"></i> Save</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Right: Preview -->
+            <div class="preview-section">
+                <div class="preview-header">
+                    <h5>Sizes Preview</h5>
+                    <button class="btn btn-outline-secondary btn-sm" onclick="clearSizes()"><i class="fas fa-times-circle"></i> Clear</button>
+                </div>
+                <div style="background: white; border: 1px solid #eef2f6; border-radius:8px; flex:1; display:flex; flex-direction:column;">
+                    <table class="preview-table" style="width:100%;">
+                        <thead>
+                            <tr>
+                                <th>COLOUR</th>
+                                <th>SIZES</th>
+                            </tr>
+                        </thead>
+                        <tbody id="previewTbody">
+                            <tr id="noDataRow">
+                                <td colspan="2" style="height: 200px;">
+                                    <div class="empty-state">
+                                        <i class="fas fa-folder-open"></i>
+                                        <h5 style="color:#333;">No sizes added yet</h5>
+                                        <p style="font-size:13px;">Add sizes using the form to see the preview here.</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        var addedSizes = [];
+
+        function addSize() {
+        var input = document.getElementById('sizeInput');
+        var val = input.value.trim();
+        if (val === '') return;
+
+        addedSizes.push(val);
+        input.value = '';
+        updatePreview();
+        }
+        
+
+        function clearSizes() {
+        addedSizes = [];
+        updatePreview();
+        }
+
+        function updatePreview() {
+        var tbody = document.getElementById('previewTbody');
+        var color = document.getElementById('colorCode').value.trim() || '-';
+        document.getElementById('finalSizes').value = addedSizes.join(',');
+
+        if (addedSizes.length === 0) {
+        tbody.innerHTML = `<tr id="noDataRow"><td colspan="2" style="height: 200px;">
+        <div class="empty-state">
+        <i class="fas fa-folder-open"></i>
+        <h5 style="color:#333;">No sizes added yet</h5>
+        <p style="font-size:13px;">Add sizes using the form to see the preview here.</p>
+        </div>
+        </td></tr>`;
+        return;
+        }
+
+        var sizesHtml = addedSizes.map(s => `<span class="size-badge">${s}</span>`).join(' ');
+        tbody.innerHTML = `
+        <tr>
+        <td><strong>${color}</strong></td>
+        <td>${sizesHtml}</td>
+        </tr>
+        `;
+        }
+
+        function saveStyle() {
+        var form = document.getElementById('addStyleForm');
+        var formData = new FormData(form);
+
+        if (addedSizes.length === 0) {
+        alert("Please add at least one size.");
+        return;
+        }
+
+        fetch("/Style/Create", {
+        method: "POST",
+        body: formData
+        })
+        .then(r => r.json())
+        .then(data => {
+        if (data.success) {
+        alert(data.message);
+        window.location.href = '/Style/Index';
+        } else {
+        alert("Error: " + data.message);
+        }
+        });
+        }
+    </script>
+</body>
+</html>

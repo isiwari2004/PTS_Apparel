@@ -1,0 +1,251 @@
+﻿@model List<PTS_Apparel.Models.PO>
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>PO Management</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+            body {
+                display: flex;
+                background: #f4f6f9;
+                margin: 0;
+                font-family: 'Segoe UI';
+            }
+
+            .sidebar {
+                width: 250px;
+                background-color: #1e3250;
+                color: white;
+                height: 100vh;
+                padding: 20px;
+                position: fixed;
+                top: 0;
+                left: 0;
+                overflow-y: auto;
+                z-index: 999;
+            }
+
+                .sidebar a {
+                    color: #a4b6d4;
+                    text-decoration: none;
+                    display: block;
+                    padding: 10px;
+                    border-radius: 5px;
+                    margin-bottom: 5px;
+                }
+
+                    .sidebar a:hover, .sidebar a.active {
+                        background: rgba(255,255,255,0.1);
+                        color: white;
+                    }
+
+            .green-icon {
+                color: #2ecc71;
+            }
+
+            .content {
+                margin-left: 250px;
+                padding: 30px;
+                flex: 1;
+            }
+
+            .search-bar {
+                background: white;
+                padding: 15px;
+                border-radius: 10px;
+                border: 1px solid #eef2f6;
+                display: flex;
+                flex-wrap: wrap;
+                gap: 15px;
+                margin-bottom: 25px;
+            }
+
+            .btn-dark-custom {
+                background-color: #203455;
+                color: white;
+                border: none;
+                border-radius: 6px;
+                padding: 8px 16px;
+            }
+
+            .btn-outline-custom {
+                border: 1px solid #ced4da;
+                background: white;
+                border-radius: 6px;
+                padding: 7px 15px;
+                color: #555;
+            }
+
+            .table-container {
+                background: white;
+                border-radius: 12px;
+                border: 1px solid #eef2f6;
+                overflow: hidden;
+            }
+
+            .custom-table {
+                width: 100%;
+                border-collapse: collapse;
+                font-size: 14px;
+            }
+
+                .custom-table thead {
+                    background: #f8fafc;
+                    border-bottom: 1px solid #eef2f6;
+                }
+
+                .custom-table th {
+                    text-align: left;
+                    padding: 15px 20px;
+                    font-weight: 600;
+                    font-size: 11px;
+                    letter-spacing: 0.5px;
+                    color: #778ca2;
+                    text-transform: uppercase;
+                }
+
+                .custom-table td {
+                    padding: 20px;
+                    border-bottom: 1px solid #f1f4f8;
+                }
+
+            .action-icons a {
+                color: #778ca2;
+                margin: 0 5px;
+                cursor: pointer;
+            }
+
+                .action-icons a:hover {
+                    color: #203455;
+                }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <h5><i class="fas fa-cut green-icon"></i> ApparelPTS</h5>
+        <hr>
+        <a href="/Home/Dashboard"><i class="fas fa-th-large"></i> Dashboard</a>
+        <a href="/Factory/Index"><i class="fas fa-industry"></i> Factory</a>
+        <a href="/Customer/Index"><i class="fas fa-user-friends"></i> Customer</a>
+        <a href="/Style/Index"><i class="fas fa-tshirt"></i> Style</a>
+        <a href="/POManagement/Index" class="active"><i class="fas fa-file-invoice"></i> PO</a>
+        <a href="/InputRecorder/Index"><i class="fas fa-clipboard-list"></i> Input Recorder</a>
+        <a href="#"><i class="fas fa-chart-line"></i> Forecast</a>
+        <a href="#"><i class="fas fa-list-ul"></i> Line Recorder</a>
+        <a href="#"><i class="fas fa-clock"></i> Hourly Tracking</a>
+        <a href="#"><i class="fas fa-exclamation-triangle"></i> Defect Report</a>
+        @if (Context.Session.GetString("Role") == "Admin")
+        {
+            <a href="/Home/ScreenPrivileges"><i class="fas fa-lock"></i> Screen Privileges</a>
+            <a href="/User/Register"><i class="fas fa-user-plus"></i> User Register</a>
+        }
+        <hr>
+        <a href="/Account/Logout" class="text-danger"><i class="fas fa-sign-out-alt"></i> Logout</a>
+    </div>
+
+    <div class="content">
+        <div class="d-flex justify-content-between align-items-start mb-3">
+            <div>
+                <h4>PO Management</h4>
+                <p class="text-muted">Manage purchase orders, customer styles, colours, and production quantities</p>
+            </div>
+        </div>
+
+        <div class="search-bar">
+            <div class="input-group" style="flex:1;">
+                <input type="text" id="searchInput" class="form-control" placeholder="Search PO...">
+            </div>
+            <button class="btn-dark-custom" onclick="searchPOs()">Search</button>
+            <button class="btn-outline-custom" onclick="location.reload()"><i class="fas fa-sync-alt me-1"></i> Refresh</button>
+            @if (ViewBag.CanAdd != null && ViewBag.CanAdd == true)
+            {
+                <button class="btn-dark-custom" style="margin-left: auto;" onclick="window.location.href='/POManagement/Upsert'">
+                    <i class="fas fa-plus"></i> Add PO
+                </button>
+            }
+        </div>
+
+        <div class="table-container">
+            <table class="custom-table">
+                <thead>
+                    <tr>
+                        <th>PO NUMBER</th>
+                        <th>CUSTOMER</th>
+                        <th>STYLE</th>
+                        <th>COLOR</th>
+                        <th>QUANTITY</th>
+                        @if (ViewBag.CanEdit != null && ViewBag.CanEdit == true)
+                        {
+                            <th style="text-align: right; padding-right: 30px;">ACTIONS</th>
+                        }
+                    </tr>
+                </thead>
+                <tbody id="poTableBody">
+                    @foreach (var item in Model)
+                    {
+                        <tr id="row-@item.Id">
+                            <td><strong>@item.PONumber</strong></td>
+                            <td>@item.Customer</td>
+                            <td>@item.Style</td>
+                            <td>@item.Color</td>
+                            <td>@item.Quantity</td>
+                            @if (ViewBag.CanEdit != null && ViewBag.CanEdit == true)
+                            {
+                                <td style="text-align: right; padding-right: 30px;">
+                                    <div class="action-icons">
+                                        <a onclick="window.location.href='/POManagement/Upsert?id=@item.Id'"><i class="fas fa-pen"></i></a>
+                                        <a class="btn-delete" onclick="deletePO(@item.Id)"><i class="fas fa-trash-alt"></i></a>
+                                    </div>
+                                </td>
+                            }
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function searchPOs() {
+        var term = document.getElementById('searchInput').value.trim();
+        fetch(`/POManagement/Search?searchTerm=${encodeURIComponent(term)}`)
+        .then(r => r.json()).then(data => {
+        var tbody = document.getElementById('poTableBody');
+        tbody.innerHTML = '';
+        data.forEach(item => {
+        var row = `<tr id="row-${item.id}">
+        <td><strong>${item.ponumber}</strong></td>
+        <td>${item.customer}</td>
+        <td>${item.style}</td>
+        <td>${item.color}</td>
+        <td>${item.quantity}</td>
+        <td style="text-align: right; padding-right: 30px;">
+        <div class="action-icons">
+        <a onclick="window.location.href='/POManagement/Upsert?id=${item.id}'"><i class="fas fa-pen"></i></a>
+        <a class="btn-delete" onclick="deletePO(${item.id})"><i class="fas fa-trash-alt"></i></a>
+        </div>
+        </td>
+        </tr>`;
+        tbody.innerHTML += row;
+        });
+        });
+        }
+
+        function deletePO(id) {
+        if(confirm("Delete this PO?")) {
+        var fd = new FormData(); fd.append('id', id);
+        fetch("/POManagement/Delete", { method:"POST", body: fd })
+        .then(r=>r.json()).then(data => {
+        if(data.success) location.reload();
+        else alert("Error deleting.");
+        });
+        }
+        }
+    </script>
+</body>
+</html>

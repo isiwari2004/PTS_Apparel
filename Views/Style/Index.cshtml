@@ -1,0 +1,683 @@
+﻿@model List<PTS_Apparel.Models.Style>
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Style Management - ApparelPTS</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+            /* ===== Global & Sidebar ===== */
+            body {
+                display: flex;
+                background: #f4f6f9;
+                margin: 0;
+                font-family: 'Segoe UI', sans-serif;
+            }
+
+            .sidebar {
+                width: 250px;
+                background-color: #1e3250;
+                color: white;
+                height: 100vh;
+                padding: 20px;
+                position: fixed;
+                top: 0;
+                left: 0;
+                overflow-y: auto;
+                z-index: 999;
+            }
+
+                .sidebar a {
+                    color: #a4b6d4;
+                    text-decoration: none;
+                    display: block;
+                    padding: 10px;
+                    border-radius: 5px;
+                    margin-bottom: 5px;
+                }
+
+                    .sidebar a:hover, .sidebar a.active {
+                        background: rgba(255,255,255,0.1);
+                        color: white;
+                    }
+
+            .green-icon {
+                color: #2ecc71;
+            }
+
+            .content {
+                margin-left: 250px;
+                padding: 30px;
+                flex: 1;
+            }
+
+            .search-bar {
+                background: white;
+                padding: 15px;
+                border-radius: 10px;
+                border: 1px solid #eef2f6;
+                display: flex;
+                flex-wrap: wrap;
+                gap: 15px;
+                margin-bottom: 25px;
+            }
+
+            .btn-dark-custom {
+                background-color: #203455;
+                color: white;
+                border: none;
+                border-radius: 6px;
+                padding: 8px 16px;
+            }
+
+                .btn-dark-custom:hover {
+                    background-color: #14263f;
+                    color: white;
+                }
+
+            .table-container {
+                background: white;
+                border-radius: 12px;
+                border: 1px solid #eef2f6;
+                overflow: hidden;
+            }
+
+            .custom-table {
+                width: 100%;
+                border-collapse: collapse;
+                font-size: 14px;
+            }
+
+                .custom-table thead {
+                    background: #f8fafc;
+                    border-bottom: 1px solid #eef2f6;
+                }
+
+                .custom-table th {
+                    text-align: left;
+                    padding: 15px 20px;
+                    font-weight: 600;
+                    font-size: 11px;
+                    letter-spacing: 0.5px;
+                    color: #778ca2;
+                    text-transform: uppercase;
+                }
+
+                .custom-table td {
+                    padding: 20px;
+                    border-bottom: 1px solid #f1f4f8;
+                }
+
+            .style-code-badge {
+                background: #eef2f7;
+                color: #333;
+                font-weight: 700;
+                padding: 4px 10px;
+                border-radius: 5px;
+                font-size: 12px;
+            }
+
+            .size-badge {
+                background: #e3edfb;
+                color: #1e6bb8;
+                font-weight: 600;
+                border-radius: 4px;
+                padding: 3px 8px;
+                margin-right: 4px;
+                display: inline-block;
+                font-size: 12px;
+            }
+
+            .action-icons a {
+                color: #778ca2;
+                margin: 0 5px;
+                cursor: pointer;
+            }
+
+                .action-icons a:hover {
+                    color: #203455;
+                }
+
+            /* ===== MODAL UI ===== */
+            .modal-xl-custom {
+                max-width: 1100px;
+            }
+
+            .modal-left {
+                padding: 30px 40px;
+            }
+
+                .modal-left h5 {
+                    font-weight: 700;
+                    color: #1e3250;
+                    margin-bottom: 25px;
+                }
+
+            .form-label {
+                font-weight: 600;
+                color: #333;
+                font-size: 14px;
+                margin-bottom: 5px;
+            }
+
+            .form-control, .form-select {
+                border-radius: 8px;
+                background: #fafbfc;
+                border: 1px solid #e0e0e0;
+                padding: 10px 15px;
+            }
+
+                .form-control:focus, .form-select:focus {
+                    border-color: #203455;
+                    box-shadow: 0 0 0 0.2rem rgba(32, 52, 85, 0.1);
+                }
+
+            .size-group {
+                display: flex;
+                gap: 10px;
+            }
+
+                .size-group input {
+                    flex: 1;
+                }
+
+            .drop-zone {
+                border: 2px dashed #d1d5db;
+                border-radius: 12px;
+                padding: 25px;
+                text-align: center;
+                background: #f8fafc;
+                margin: 15px 0 25px 0;
+                transition: 0.3s;
+            }
+
+                .drop-zone:hover {
+                    border-color: #203455;
+                    background: #f1f5f9;
+                }
+
+                .drop-zone i {
+                    font-size: 35px;
+                    color: #2563a0;
+                    background: #e3edfb;
+                    padding: 15px;
+                    border-radius: 50%;
+                    margin-bottom: 10px;
+                }
+
+                .drop-zone p {
+                    margin: 0;
+                    font-weight: 500;
+                    color: #333;
+                }
+
+                .drop-zone small {
+                    color: #2563a0;
+                    text-decoration: underline;
+                    cursor: pointer;
+                }
+
+                .drop-zone .ext-badges span {
+                    background: #e5e7eb;
+                    color: #555;
+                    padding: 2px 8px;
+                    border-radius: 4px;
+                    font-size: 11px;
+                    margin: 0 3px;
+                }
+
+            .btn-green-upload {
+                background: #2ecc71;
+                color: white;
+                border: none;
+                border-radius: 6px;
+                padding: 10px 20px;
+                font-weight: 600;
+            }
+
+            .btn-custom-save {
+                background: #203455;
+                color: white;
+                border: none;
+                border-radius: 6px;
+                padding: 10px 25px;
+                font-weight: 600;
+            }
+
+            .modal-right {
+                padding: 30px 40px;
+                background: #fbfbfd;
+                border-left: 1px solid #eef2f6;
+                min-height: 500px;
+            }
+
+            .preview-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 20px;
+            }
+
+                .preview-header h5 {
+                    font-weight: 700;
+                    color: #1e3250;
+                    margin: 0;
+                }
+
+            .preview-search {
+                max-width: 250px;
+                border-radius: 8px;
+                border: 1px solid #e0e0e0;
+                padding: 6px 12px;
+                font-size: 14px;
+            }
+
+            .preview-table-container {
+                background: white;
+                border: 1px solid #eef2f6;
+                border-radius: 10px;
+                overflow: hidden;
+            }
+
+            .preview-table {
+                width: 100%;
+                border-collapse: collapse;
+            }
+
+                .preview-table th {
+                    background: #f8fafc;
+                    padding: 12px 15px;
+                    color: #778ca2;
+                    font-weight: 600;
+                    font-size: 12px;
+                    text-align: left;
+                    border-bottom: 1px solid #eef2f6;
+                }
+
+                .preview-table td {
+                    padding: 12px 15px;
+                }
+
+            .empty-state-modal {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                padding: 40px 0;
+                color: #999;
+            }
+
+                .empty-state-modal i {
+                    font-size: 50px;
+                    color: #d1d5db;
+                    margin-bottom: 15px;
+                }
+
+                .empty-state-modal h6 {
+                    color: #333;
+                    font-weight: 600;
+                    margin-top: 10px;
+                }
+
+                .empty-state-modal p {
+                    font-size: 13px;
+                    color: #999;
+                }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <h5><i class="fas fa-cut green-icon"></i> ApparelPTS</h5>
+        <hr>
+        <a href="/Home/Dashboard"><i class="fas fa-th-large"></i> Dashboard</a>
+        <a href="/Factory/Index"><i class="fas fa-industry"></i> Factory</a>
+        <a href="/Customer/Index"><i class="fas fa-user-friends"></i> Customer</a>
+        <a href="/Style/Index" class="active"><i class="fas fa-tshirt"></i> Style</a>
+        <a href="/POManagement/Index"><i class="fas fa-file-invoice"></i> PO</a>
+        <a href="#"><i class="fas fa-clipboard-list"></i> Input Recorder</a>
+        <a href="#"><i class="fas fa-chart-line"></i> Forecast</a>
+        <a href="#"><i class="fas fa-list-ul"></i> Line Recorder</a>
+        <a href="#"><i class="fas fa-clock"></i> Hourly Tracking</a>
+        <a href="#"><i class="fas fa-exclamation-triangle"></i> Defect Report</a>
+        @if (Context.Session.GetString("Role") == "Admin")
+        {
+            <a href="/Home/ScreenPrivileges"><i class="fas fa-lock"></i> Screen Privileges</a>
+            <a href="/User/Register"><i class="fas fa-user-plus"></i> User Register</a>
+        }
+        <hr>
+        <a href="/Account/Logout" class="text-danger"><i class="fas fa-sign-out-alt"></i> Logout</a>
+    </div>
+
+    <div class="content">
+        <div class="d-flex justify-content-between align-items-start mb-3">
+            <div>
+                <h4>Style Management</h4>
+                <p class="text-muted">Manage apparel styles, colours, sizes, and production specifications</p>
+            </div>
+        </div>
+
+        <div class="search-bar">
+            <div class="input-group" style="flex:1;">
+                <input type="text" id="searchInput" class="form-control" placeholder="Search styles...">
+            </div>
+            <button class="btn-dark-custom" onclick="searchStyles()">Search</button>
+            <button class="btn btn-outline-secondary" onclick="location.reload()"><i class="fas fa-sync-alt me-1"></i> Refresh</button>
+            @if (ViewBag.CanAdd != null && ViewBag.CanAdd == true)
+            {
+                <button class="btn-dark-custom" style="margin-left: auto;" onclick="openAddModal()">
+                    <i class="fas fa-plus"></i> Add Style
+                </button>
+            }
+        </div>
+
+        <div class="table-container">
+            <table class="custom-table">
+                <thead>
+                    <tr>
+                        <th>CUSTOMER NAME</th>
+                        <th>STYLE CODE</th>
+                        <th>COLOR CODE</th>
+                        <th>SIZES</th>
+                        @if (ViewBag.CanEdit != null && ViewBag.CanEdit == true)
+                        {
+                            <th style="text-align: right; padding-right: 30px;">ACTIONS</th>
+                        }
+                    </tr>
+                </thead>
+                <tbody id="styleTableBody">
+                    @foreach (var item in Model)
+                    {
+                        <tr id="row-@item.Id">
+                            <td>@item.CustomerName</td>
+                            <td><span class="style-code-badge">@item.StyleCode</span></td>
+                            <td>@item.ColorCode</td>
+                            <td>
+                                @foreach (var size in item.Sizes.Split(','))
+                                {
+                                    <span class="size-badge">@size</span>
+                                }
+                            </td>
+                            @if (ViewBag.CanEdit != null && ViewBag.CanEdit == true)
+                            {
+                                <td style="text-align: right; padding-right: 30px;">
+                                    <div class="action-icons">
+                                        <a onclick="openEditModal(@item.Id)"><i class="fas fa-pen"></i></a>
+                                        <a class="btn-delete" onclick="deleteStyle(@item.Id)"><i class="fas fa-trash-alt"></i></a>
+                                    </div>
+                                </td>
+                            }
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- ==================== MODAL ==================== -->
+    <div class="modal fade" id="styleModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-xl-custom modal-dialog-centered">
+            <div class="modal-content" style="border-radius: 16px; border: none; box-shadow: 0 10px 25px rgba(0,0,0,0.1);">
+                <div class="modal-body p-0">
+                    <div class="row g-0">
+
+                        <!-- LEFT SIDE: Form -->
+                        <div class="col-md-6 modal-left">
+                            <h5>Enter Style Details</h5>
+                            <form id="styleForm">
+                                <input type="hidden" id="edit_Id" name="Id" value="0" />
+
+                                <div class="mb-3">
+                                    <label class="form-label">Customer</label>
+                                    <select class="form-select" id="edit_CustomerName" name="CustomerName" required>
+                                        <option value="">Select customer</option>
+                                        <option value="Blaklader">Blaklader</option>
+                                        <option value="Concord Apparel">Concord Apparel</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Style</label>
+                                    <input type="text" class="form-control" id="edit_StyleCode" name="StyleCode" placeholder="Enter style name" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Colour</label>
+                                    <input type="text" class="form-control" id="edit_ColorCode" name="ColorCode" placeholder="Enter colour" required>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label">Sizes</label>
+                                    <div class="size-group">
+                                        <input type="text" class="form-control" id="sizeInputModal" placeholder="Type sizes or click search">
+                                        <button class="btn btn-dark-custom" type="button" onclick="addSizeModal()">Add</button>
+                                    </div>
+                                    <input type="hidden" id="finalSizes" name="Sizes" />
+                                </div>
+
+                                <div class="mt-2 text-muted" style="font-size: 13px;">Or upload sizes from file</div>
+
+                                <div class="drop-zone">
+                                    <i class="fas fa-cloud-upload-alt"></i>
+                                    <p>Drag & drop file here</p>
+                                    <small>or <span style="color: #2563a0;">click to browse</span></small>
+                                    <div class="ext-badges mt-2">
+                                        <span>.xlsx</span>
+                                        <span>.xls</span>
+                                        <span>.csv</span>
+                                    </div>
+                                </div>
+
+                                <div class="d-flex gap-3 mt-3">
+                                    <button type="button" class="btn-green-upload"><i class="fas fa-upload me-2"></i> Upload</button>
+                                    <button type="button" class="btn btn-outline-secondary px-4" data-bs-dismiss="modal">Cancel</button>
+                                    <button type="button" class="btn-custom-save" onclick="saveStyleModal()"><i class="fas fa-save me-2"></i> Save</button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- RIGHT SIDE: Preview -->
+                        <div class="col-md-6 modal-right">
+                            <div class="preview-header">
+                                <h5>Sizes Preview</h5>
+                                <div>
+                                    <input type="text" class="preview-search" placeholder="🔍 Search sizes...">
+                                    <button class="btn btn-outline-secondary btn-sm ms-2" onclick="clearSizesModal()"><i class="fas fa-times-circle"></i> Clear</button>
+                                </div>
+                            </div>
+
+                            <div class="preview-table-container">
+                                <table class="preview-table">
+                                    <thead>
+                                        <tr><th style="width: 25%;">COLOUR</th><th>SIZES</th></tr>
+                                    </thead>
+                                    <tbody id="modalPreviewTbody">
+                                        <tr id="modalNoDataRow">
+                                            <td colspan="2" style="height: 280px;">
+                                                <div class="empty-state-modal">
+                                                    <i class="fas fa-folder-open"></i>
+                                                    <h6>No sizes added yet</h6>
+                                                    <p>Add sizes using the form or upload a file<br>to see the preview here.</p>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== SCRIPTS ==================== -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // --- GLOBAL Modal variables ---
+        var addedSizes = [];
+        var styleModal = null;
+
+        // --- Open Add Modal ---
+        function openAddModal() {
+        document.getElementById('edit_Id').value = 0;
+        document.getElementById('edit_CustomerName').value = '';
+        document.getElementById('edit_StyleCode').value = '';
+        document.getElementById('edit_ColorCode').value = '';
+        document.getElementById('sizeInputModal').value = '';
+        addedSizes = [];
+        clearSizesModal();
+        styleModal = new bootstrap.Modal(document.getElementById('styleModal'));
+        styleModal.show();
+        }
+
+        // --- Open Edit Modal ---
+        function openEditModal(id) {
+        fetch(`/Style/GetStyle?id=${id}`)
+        .then(r => r.json())
+        .then(res => {
+        if(res.success) {
+        var data = res.data;
+        document.getElementById('edit_Id').value = data.id;
+        document.getElementById('edit_CustomerName').value = data.customerName;
+        document.getElementById('edit_StyleCode').value = data.styleCode;
+        document.getElementById('edit_ColorCode').value = data.colorCode;
+
+        // DB එකෙන් එන sizes ටික Input Box එකට දානවා (space වලින් වෙන් කරලා)
+        var sizesString = data.sizes ? data.sizes.split(',').join(' ') : '';
+        document.getElementById('sizeInputModal').value = sizesString;
+
+        // addedSizes array එක හිස් කරනවා (ඒ නිසා Preview එක හිස් වෙලා යයි)
+        addedSizes = [];
+
+        // Preview එක හිස් කිරීමට
+        clearSizesModal();
+
+        styleModal = new bootstrap.Modal(document.getElementById('styleModal'));
+        styleModal.show();
+        }
+        });
+        }
+
+        // --- Manage Sizes in Modal ---
+        function addSizeModal() {
+        var input = document.getElementById('sizeInputModal');
+        var val = input.value.trim();
+        if(val === '') return;
+
+        // අකුරු ටික input එකෙන් අරගෙන array එකට දානවා
+        var newSizes = val.split(' ');
+        newSizes.forEach(s => {
+        if(s.trim() !== '') addedSizes.push(s.trim());
+        });
+
+        input.value = '';
+        updatePreviewModal();
+        }
+
+        function clearSizesModal() {
+        addedSizes = [];
+        var tbody = document.getElementById('modalPreviewTbody');
+        tbody.innerHTML = `<tr id="modalNoDataRow"><td colspan="2" style="height: 280px;">
+        <div class="empty-state-modal">
+        <i class="fas fa-folder-open"></i>
+        <h6>No sizes added yet</h6>
+        <p>Add sizes using the form or upload a file<br>to see the preview here.</p>
+        </div>
+        </td></tr>`;
+        document.getElementById('finalSizes').value = '';
+        }
+
+        function updatePreviewModal() {
+        var color = document.getElementById('edit_ColorCode').value.trim() || '-';
+        document.getElementById('finalSizes').value = addedSizes.join(',');
+
+        var tbody = document.getElementById('modalPreviewTbody');
+        if(addedSizes.length === 0) {
+        tbody.innerHTML = `<tr id="modalNoDataRow"><td colspan="2" style="height: 280px;">
+        <div class="empty-state-modal">
+        <i class="fas fa-folder-open"></i>
+        <h6>No sizes added yet</h6>
+        <p>Add sizes using the form or upload a file<br>to see the preview here.</p>
+        </div>
+        </td></tr>`;
+        } else {
+        var sizesHtml = addedSizes.map(s => `<span class="size-badge">${s}</span>`).join(' ');
+        tbody.innerHTML = `<tr><td><strong>${color}</strong></td><td>${sizesHtml}</td></tr>`;
+        }
+        }
+
+        // --- Save Modal (Create / Update) ---
+        function saveStyleModal() {
+        var id = document.getElementById('edit_Id').value;
+        var cust = document.getElementById('edit_CustomerName').value;
+        var style = document.getElementById('edit_StyleCode').value;
+        var color = document.getElementById('edit_ColorCode').value;
+
+        if(!cust || !style || !color) { alert("Please fill in all fields."); return; }
+        if(addedSizes.length === 0) { alert("Please add at least one size."); return; }
+
+        // 🔥 JSON එකක් හදලා යවනවා (Controller එකේ [FromBody] තියෙන නිසා)
+        var formData = {
+        Id: parseInt(id),
+        CustomerName: cust,
+        StyleCode: style,
+        ColorCode: color,
+        Sizes: addedSizes.join(',')
+        };
+
+        fetch("/Style/SaveStyle", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData)
+        })
+        .then(r => r.json())
+        .then(data => {
+        if(data.success) {
+        styleModal.hide();
+        location.reload(); // Reload table
+        } else {
+        alert("Error: " + data.message);
+        }
+        });
+        }
+
+        // --- Search & Delete functions ---
+        function searchStyles() {
+        var term = document.getElementById('searchInput').value.trim();
+        fetch(`/Style/Search?searchTerm=${encodeURIComponent(term)}`)
+        .then(r => r.json()).then(data => {
+        var tbody = document.getElementById('styleTableBody');
+        tbody.innerHTML = '';
+        data.forEach(item => {
+        var sizesHtml = item.sizes.split(',').map(s => `<span class="size-badge">${s}</span>`).join('');
+        var row = `<tr id="row-${item.id}">
+        <td>${item.customerName}</td>
+        <td><span class="style-code-badge">${item.styleCode}</span></td>
+        <td>${item.colorCode}</td>
+        <td>${sizesHtml}</td>
+        <td style="text-align: right; padding-right: 30px;">
+        <div class="action-icons">
+        <a onclick="openEditModal(${item.id})"><i class="fas fa-pen"></i></a>
+        <a class="btn-delete" onclick="deleteStyle(${item.id})"><i class="fas fa-trash-alt"></i></a>
+        </div>
+        </td>
+        </tr>`;
+        tbody.innerHTML += row;
+        });
+        });
+        }
+
+        function deleteStyle(id) {
+        if(confirm("Delete this style?")) {
+        var fd = new FormData(); fd.append('id', id);
+        fetch("/Style/Delete", { method:"POST", body: fd })
+        .then(r=>r.json()).then(data => {
+        if(data.success) location.reload();
+        else alert("Error deleting.");
+        });
+        }
+        }
+    </script>
+</body>
+</html>

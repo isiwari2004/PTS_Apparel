@@ -1,0 +1,554 @@
+﻿@model List<PTS_Apparel.Models.InputRecorder>
+@{
+    Layout = null;
+    var allSizes = Model.SelectMany(m => m.GetSizes().Keys).Distinct().OrderBy(s => s).ToList();
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Input Recorder - ApparelPTS</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+            /* ==========================================
+                       1. පිටුවේ Layout
+                       ========================================== */
+            body {
+                display: flex;
+                background: #f4f6f9;
+                margin: 0;
+                font-family: 'Segoe UI';
+                height: 100vh;
+                overflow: hidden;
+            }
+
+            .sidebar {
+                width: 250px;
+                background-color: #1e3250;
+                color: white;
+                height: 100vh;
+                padding: 20px;
+                position: fixed;
+                top: 0;
+                left: 0;
+                overflow-y: auto;
+                z-index: 999;
+            }
+
+                .sidebar a {
+                    color: #a4b6d4;
+                    text-decoration: none;
+                    display: block;
+                    padding: 10px;
+                    border-radius: 5px;
+                    margin-bottom: 5px;
+                }
+
+                    .sidebar a:hover, .sidebar a.active {
+                        background: rgba(255,255,255,0.1);
+                        color: white;
+                    }
+
+            .content {
+                margin-left: 250px;
+                padding: 30px;
+                flex: 1;
+                height: 100vh;
+                overflow-y: auto;
+                box-sizing: border-box;
+            }
+
+            /* ==========================================
+                       2. Toolbar & Tabs
+                       ========================================== */
+            .toolbar {
+                background: white;
+                padding: 12px 20px;
+                border-radius: 10px;
+                border: 1px solid #eef2f6;
+                display: flex;
+                flex-wrap: wrap;
+                gap: 12px;
+                margin-bottom: 20px;
+                align-items: center;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            }
+
+            .toolbar-input-group {
+                display: flex;
+                flex: 1;
+                min-width: 200px;
+            }
+
+                .toolbar-input-group .input-group-text {
+                    background: #f8f9fa;
+                    border: 1px solid #eef2f6;
+                    border-right: none;
+                    border-radius: 6px 0 0 6px;
+                    color: #999;
+                }
+
+                .toolbar-input-group input {
+                    border: 1px solid #eef2f6;
+                    border-left: none;
+                    border-radius: 0 6px 6px 0;
+                    background: #f8f9fa;
+                    padding: 8px 12px;
+                }
+
+            .btn-dark-custom {
+                background-color: #203455;
+                color: white;
+                border: none;
+                border-radius: 6px;
+                padding: 7px 18px;
+                font-weight: 500;
+                transition: 0.2s;
+            }
+
+                .btn-dark-custom:hover {
+                    background-color: #14263f;
+                    color: white;
+                }
+
+            .btn-add {
+                background-color: #203455;
+                color: white;
+                border: none;
+                border-radius: 6px;
+                padding: 7px 18px;
+                display: flex;
+                align-items: center;
+                gap: 6px;
+            }
+
+            .tab-bar {
+                display: flex;
+                gap: 10px;
+                margin-bottom: 15px;
+                flex-wrap: wrap;
+            }
+
+            .tab-btn {
+                background: white;
+                border: 1px solid #eef2f6;
+                padding: 8px 24px;
+                border-radius: 6px;
+                color: #555;
+                font-weight: 500;
+                text-decoration: none;
+                transition: 0.2s;
+            }
+
+                .tab-btn:hover {
+                    border-color: #203455;
+                    color: #203455;
+                }
+
+                .tab-btn.active {
+                    background: #203455;
+                    color: white;
+                    border-color: #203455;
+                }
+
+            /* ==========================================================
+                       3. MAIN TABLE (මුළු Table එකම Scroll වෙන්නේ නෑ. Scroll වෙන්නේ Size Column ඇතුලේ විතරයි)
+                       ========================================================== */
+
+            /* Table Wrapper - මුළු Table එකට පළල සීමා කිරීමට */
+            .table-wrapper {
+                background: white;
+                border-radius: 12px;
+                border: 1px solid #eef2f6;
+                overflow: hidden; /* 👈 මෙය අතිශය වැදගත්: මුළු Table එක Scroll වීම වළක්වයි */
+                box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+                width: 100%;
+                position: relative;
+            }
+
+            .table-custom {
+                width: 100%;
+                border-collapse: collapse;
+                font-size: 13px;
+            }
+
+                /* Table Headers */
+                .table-custom thead tr:first-child th {
+                    background: #203455;
+                    color: white;
+                    font-weight: 600;
+                    font-size: 13px;
+                    text-align: center;
+                    padding: 10px 0;
+                    border-right: 1px solid rgba(255,255,255,0.1);
+                }
+
+                .table-custom thead tr:nth-child(2) th {
+                    background: #f8fafc;
+                    color: #6c757d;
+                    font-weight: 600;
+                    font-size: 11px;
+                    padding: 10px 12px;
+                    text-transform: uppercase;
+                    border-bottom: 2px solid #eef2f6;
+                    vertical-align: middle;
+                }
+
+                .table-custom tbody td {
+                    padding: 12px 12px;
+                    border-bottom: 1px solid #f1f4f8;
+                    vertical-align: middle;
+                    white-space: nowrap;
+                }
+
+            /* Column Widths (Fixed) */
+            .col-line {
+                width: 11%;
+            }
+
+            .col-po {
+                width: 10%;
+            }
+
+            .col-style {
+                width: 10%;
+            }
+
+            .col-colour {
+                width: 10%;
+            }
+
+            .col-status {
+                width: 10%;
+            }
+
+            .col-total {
+                width: 8%;
+                text-align: center;
+            }
+
+            .col-actions {
+                width: 12%;
+                text-align: right;
+                padding-right: 15px !important;
+            }
+
+            /* 🔥 ප්‍රධාන වෙනස: Sizes Column එකට විතරක් Scroll එක සහ min-width එක ලබා දීම */
+            .col-sizes {
+                width: 29%; /* ඉතිරි ඉඩ */
+                padding: 4px 0 !important;
+                text-align: center;
+                /* 👇 මේක තමයි ප්‍රධාන උපාය. Column එකට අවම පළලක් ලබා දීම */
+                min-width: 400px;
+            }
+
+            .sizes-scroll-container {
+                display: flex;
+                align-items: center;
+                gap: 4px;
+                white-space: nowrap;
+                flex-wrap: nowrap;
+                /* 👇 මෙය මගින් Size div එක ඇතුලේ විතරක් scroll වෙයි */
+                overflow-x: auto;
+                padding: 2px 4px;
+                width: 100%;
+            }
+
+                .sizes-scroll-container::-webkit-scrollbar {
+                    height: 5px;
+                }
+
+                .sizes-scroll-container::-webkit-scrollbar-thumb {
+                    background: #ccc;
+                    border-radius: 4px;
+                }
+
+                .sizes-scroll-container::-webkit-scrollbar-track {
+                    background: #f1f1f1;
+                }
+
+            /* Headers for Sizes also need min-width and scroll */
+            .header-sizes-container {
+                display: flex;
+                align-items: center;
+                gap: 4px;
+                white-space: nowrap;
+                flex-wrap: nowrap;
+                overflow-x: auto;
+                padding: 0 4px;
+                width: 100%;
+            }
+
+                .header-sizes-container::-webkit-scrollbar {
+                    height: 5px;
+                }
+
+                .header-sizes-container::-webkit-scrollbar-thumb {
+                    background: #ccc;
+                    border-radius: 4px;
+                }
+
+                .header-sizes-container::-webkit-scrollbar-track {
+                    background: #f1f1f1;
+                }
+
+
+            /* Status Badges */
+            .badge-pending {
+                background: #fef3c7;
+                color: #b7791f;
+                padding: 4px 12px;
+                border-radius: 20px;
+                font-weight: 600;
+                font-size: 12px;
+                display: inline-block;
+            }
+
+            .badge-updated {
+                background: #d1fae5;
+                color: #0b7e45;
+                padding: 4px 12px;
+                border-radius: 20px;
+                font-weight: 600;
+                font-size: 12px;
+                display: inline-block;
+            }
+
+            /* Size Inputs & Dashes */
+            .size-text {
+                width: 40px;
+                text-align: center;
+                border: none;
+                background: transparent;
+                padding: 2px;
+                font-weight: 500;
+                color: #203455;
+            }
+
+                .size-text:focus {
+                    outline: none;
+                }
+
+            .dash-span {
+                color: #ccc;
+                display: inline-block;
+                width: 40px;
+                text-align: center;
+                font-size: 14px;
+            }
+
+            /* Total & Actions */
+            .total-text {
+                font-weight: 700;
+                color: #203455;
+                font-size: 14px;
+                text-align: center;
+            }
+
+            .btn-update {
+                background: #203455;
+                color: white;
+                border: none;
+                border-radius: 20px;
+                padding: 3px 15px;
+                font-size: 12px;
+                transition: 0.2s;
+            }
+
+                .btn-update:hover {
+                    background: #14263f;
+                }
+
+            .btn-done {
+                background: #2ecc71;
+                color: white;
+                border: none;
+                border-radius: 20px;
+                padding: 3px 15px;
+                font-size: 12px;
+                transition: 0.2s;
+            }
+
+                .btn-done:hover {
+                    background: #27ae60;
+                }
+
+            .action-icons a {
+                color: #99a7b9;
+                margin-left: 8px;
+                cursor: pointer;
+                transition: 0.2s;
+            }
+
+                .action-icons a:hover {
+                    color: #dc3545;
+                }
+
+         
+            @@media (max-width: 768px) {
+                .sidebar {
+                    display: none;
+                }
+
+                .content {
+                    margin-left: 0;
+                    width: 100%;
+                    padding: 15px;
+                }
+            }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <h5><i class="fas fa-cut green-icon"></i> ApparelPTS</h5>
+        <hr>
+        <a href="/Home/Dashboard"><i class="fas fa-th-large"></i> Dashboard</a>
+        <a href="/Factory/Index"><i class="fas fa-industry"></i> Factory</a>
+        <a href="/Customer/Index"><i class="fas fa-user-friends"></i> Customer</a>
+        <a href="/Style/Index"><i class="fas fa-tshirt"></i> Style</a>
+        <a href="/POManagement/Index"><i class="fas fa-file-invoice"></i> PO</a>
+        <a href="/Forecast/Index"><i class="fas fa-chart-line"></i> Forecast</a>
+        <a href="/InputRecorder/Index" class="active"><i class="fas fa-clipboard-list"></i> Input Recorder</a>
+        <a href="#"><i class="fas fa-clock"></i> Hourly Tracking</a>
+        <a href="#"><i class="fas fa-exclamation-triangle"></i> Defect Report</a>
+        @if (Context.Session.GetString("Role") == "Admin")
+        {
+            <a href="/Home/ScreenPrivileges"><i class="fas fa-lock"></i> Screen Privileges</a>
+            <a href="/User/Register"><i class="fas fa-user-plus"></i> User Register</a>
+        }
+        <hr>
+        <a href="/Account/Logout" class="text-danger"><i class="fas fa-sign-out-alt"></i> Logout</a>
+    </div>
+
+    <div class="content">
+        <div class="page-header mb-3">
+            <h4>Input Recorder</h4>
+            <p class="text-muted">Record daily production quantities across lines, POs, styles, and colours</p>
+        </div>
+
+        <div class="toolbar">
+            <div class="toolbar-input-group">
+                <span class="input-group-text"><i class="fas fa-search"></i></span>
+                <input type="text" class="form-control" placeholder="Search line, PO, style, colour...">
+            </div>
+            <button class="btn-dark-custom">Search</button>
+            <button class="btn btn-outline-secondary" onclick="location.reload()"><i class="fas fa-sync-alt me-1"></i> Refresh</button>
+            <input type="date" class="form-control" style="width: 150px;" />
+            <button class="btn-add" style="margin-left: auto;"><i class="fas fa-plus"></i> Add Recorder</button>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tab-bar">
+            @foreach (var fac in ViewBag.Factories as List<string>)
+            {
+                var activeClass = fac == ViewBag.CurrentFactory ? "active" : "";
+                <a href="@Url.Action("Index", new { factoryFilter = fac })" class="tab-btn @activeClass">@fac</a>
+            }
+        </div>
+
+        <!-- ==================== MAIN TABLE ==================== -->
+        <div class="table-wrapper">
+            <table class="table-custom">
+                <thead>
+                    <!-- පළමු පේළිය: GROUP HEADERS -->
+                    <tr>
+                        <th colspan="5" style="text-align:left; padding-left:15px !important;">ENTRY DETAILS</th>
+                        <th style="background:#203455; color:white; text-align:center; border-left:1px solid rgba(255,255,255,0.2);">QUANTITY BY SIZE</th>
+                        <th>TOTAL</th>
+                        <th>ACTIONS</th>
+                    </tr>
+                    <!-- දෙවන පේළිය: SUB-HEADERS -->
+                    <tr>
+                        <th class="col-line">LINE</th>
+                        <th class="col-po">PO</th>
+                        <th class="col-style">STYLE</th>
+                        <th class="col-colour">COLOUR</th>
+                        <th class="col-status">STATUS</th>
+
+                        <!-- Size Header (මේකත් Scroll වෙයි) -->
+                        <th class="col-sizes" style="border-left:1px solid #eef2f6; background:#f8fafc; padding: 0 !important;">
+                            <div class="header-sizes-container" style="display:flex; flex-wrap:nowrap; width:100%; padding: 6px 4px;">
+                                @foreach (var size in allSizes)
+                                {
+                                    <span style="min-width: 45px; text-align:center; color:#203455; font-weight:600; font-size:12px; display:inline-block;">@size</span>
+                                }
+                            </div>
+                        </th>
+
+                        <th class="col-total" style="color:#203455;">TOTAL</th>
+                        <th class="col-actions" style="color:#203455;">ACTIONS</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Count > 0)
+                    {
+                        @foreach (var item in Model)
+                        {
+                            var sizesDict = item.GetSizes();
+                            <tr>
+                                <!-- Fixed Entry Details (මේවා කිසිසේත් Scroll වෙන්නේ නෑ) -->
+                                <td class="col-line"><strong>@item.LineNo</strong></td>
+                                <td class="col-po">@item.PONo</td>
+                                <td class="col-style">@item.StyleNo</td>
+                                <td class="col-colour">@item.Colour</td>
+                                <td class="col-status">
+                                    @if (item.Status == "Pending")
+                                    {
+                                        <span class="badge-pending">Pending</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge-updated">Updated</span>
+                                    }
+                                </td>
+
+                                <!-- 🔥 Scrollable Sizes Column (මේක විතරක් Scroll වෙයි) -->
+                                <td class="col-sizes">
+                                    <div class="sizes-scroll-container">
+                                        @foreach (var size in allSizes)
+                                        {
+                                            var qty = sizesDict.ContainsKey(size) ? sizesDict[size] : 0;
+                                            if (qty > 0)
+                                            {
+                                                <span style="min-width: 45px; text-align:center; display:inline-block;">
+                                                    <span class="size-text">@qty</span>
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span style="min-width: 45px; text-align:center; display:inline-block;">
+                                                    <span class="dash-span">&mdash;</span>
+                                                </span>
+                                            }
+                                        }
+                                    </div>
+                                </td>
+
+                                <!-- Total & Actions -->
+                                <td class="total-text">@item.Total</td>
+                                <td class="col-actions">
+                                    <div class="action-icons" style="display:flex; align-items:center; justify-content:flex-end;">
+                                        @if (item.Status == "Pending")
+                                        {
+                                            <button class="btn-update">Update</button>
+                                        }
+                                        else
+                                        {
+                                            <button class="btn-done"><i class="fas fa-check me-1"></i> Done</button>
+                                        }
+                                        <a><i class="fas fa-trash-alt"></i></a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr><td colspan="8" class="text-center py-4 text-muted">No records found.</td></tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>
