@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Json;
 
 namespace PTS_Apparel.Models
 {
@@ -27,5 +28,12 @@ namespace PTS_Apparel.Models
         [Required(ErrorMessage = "Quantity is required")]
         [Range(1, int.MaxValue, ErrorMessage = "Quantity must be at least 1")]
         public int Quantity { get; set; }
+
+        // 👇 මේ දෙක `?` (Nullable) ලෙස වෙනස් කරලා තියෙනවා
+        [Display(Name = "Tolerance (%)")]
+        public decimal? Tolerance { get; set; }
+
+        [Display(Name = "Size Breakdown")]
+        public string? SizeBreakdownJson { get; set; }
     }
 }
