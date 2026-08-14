@@ -163,7 +163,8 @@
             <button class="btn-outline-custom" onclick="location.reload()"><i class="fas fa-sync-alt me-1"></i> Refresh</button>
             @if (ViewBag.CanAdd != null && ViewBag.CanAdd == true)
             {
-                <button class="btn-dark-custom" style="margin-left: auto;" onclick="window.location.href='/POManagement/Upsert'">
+                <!-- Add PO button එක AddPO එකට යන විදියට -->
+                <button class="btn-dark-custom" style="margin-left: auto;" onclick="window.location.href='/POManagement/AddPO'">
                     <i class="fas fa-plus"></i> Add PO
                 </button>
             }
@@ -177,6 +178,7 @@
                         <th>CUSTOMER</th>
                         <th>STYLE</th>
                         <th>COLOR</th>
+                        <th>TOLERANCE</th>
                         <th>QUANTITY</th>
                         @if (ViewBag.CanEdit != null && ViewBag.CanEdit == true)
                         {
@@ -192,6 +194,16 @@
                             <td>@item.Customer</td>
                             <td>@item.Style</td>
                             <td>@item.Color</td>
+                            <td>
+                                @if(item.Tolerance.HasValue)
+                                {
+                                    <text>@item.Tolerance.Value.ToString("0")%</text>
+                                }
+                                else
+                                {
+                                    <text>-</text>
+                                }
+                            </td>
                             <td>@item.Quantity</td>
                             @if (ViewBag.CanEdit != null && ViewBag.CanEdit == true)
                             {
@@ -212,39 +224,65 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         function searchPOs() {
-        var term = document.getElementById('searchInput').value.trim();
-        fetch(`/POManagement/Search?searchTerm=${encodeURIComponent(term)}`)
-        .then(r => r.json()).then(data => {
-        var tbody = document.getElementById('poTableBody');
-        tbody.innerHTML = '';
-        data.forEach(item => {
-        var row = `<tr id="row-${item.id}">
-        <td><strong>${item.ponumber}</strong></td>
-        <td>${item.customer}</td>
-        <td>${item.style}</td>
-        <td>${item.color}</td>
-        <td>${item.quantity}</td>
-        <td style="text-align: right; padding-right: 30px;">
-        <div class="action-icons">
-        <a onclick="window.location.href='/POManagement/Upsert?id=${item.id}'"><i class="fas fa-pen"></i></a>
-        <a class="btn-delete" onclick="deletePO(${item.id})"><i class="fas fa-trash-alt"></i></a>
-        </div>
-        </td>
-        </tr>`;
-        tbody.innerHTML += row;
-        });
-        });
+            var term = document.getElementById('searchInput').value.trim();
+            fetch(`/POManagement/Search?searchTerm=${encodeURIComponent(term)}`)
+            .then(r => r.json())
+            .then(data => {
+                var tbody = document.getElementById('poTableBody');
+                tbody.innerHTML = '';
+                
+                // දත්ත නැත්නම් "No records found" පෙන්වන්න
+                if (!data || data.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-muted">No records found.</td></tr>`;
+                    return;
+                }
+
+                data.forEach(item => {
+                    // 🔥 Universal Fix: කුඩා අකුරු හෝ ලොකු අකුරු දෙකම හසුරුවන ආරක්ෂිත කේතය
+                    var poNumber = item.ponumber || item.PONumber || item.poNumber || '-';
+                    var customer = item.customer || item.Customer || '-';
+                    var style = item.style || item.Style || '-';
+                    var color = item.color || item.Color || '-';
+                    var quantity = item.quantity || item.Quantity || 0;
+                    var tolerance = item.tolerance || item.Tolerance || null;
+                    var id = item.id || item.Id || 0;
+
+                    var toleranceDisplay = tolerance ? tolerance + '%' : '-';
+
+                    var row = `
+                        <tr id="row-${id}">
+                            <td><strong>${poNumber}</strong></td>
+                            <td>${customer}</td>
+                            <td>${style}</td>
+                            <td>${color}</td>
+                            <td>${toleranceDisplay}</td>
+                            <td>${quantity}</td>
+                            <td style="text-align: right; padding-right: 30px;">
+                                <div class="action-icons">
+                                    <a onclick="window.location.href='/POManagement/Upsert?id=${id}'"><i class="fas fa-pen"></i></a>
+                                    <a class="btn-delete" onclick="deletePO(${id})"><i class="fas fa-trash-alt"></i></a>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                    tbody.innerHTML += row;
+                });
+            })
+            .catch(error => {
+                console.error("Error fetching data:", error);
+                alert("Search failed. Please check console for details.");
+            });
         }
 
         function deletePO(id) {
-        if(confirm("Delete this PO?")) {
-        var fd = new FormData(); fd.append('id', id);
-        fetch("/POManagement/Delete", { method:"POST", body: fd })
-        .then(r=>r.json()).then(data => {
-        if(data.success) location.reload();
-        else alert("Error deleting.");
-        });
-        }
+            if(confirm("Delete this PO?")) {
+                var fd = new FormData(); fd.append('id', id);
+                fetch("/POManagement/Delete", { method:"POST", body: fd })
+                .then(r=>r.json()).then(data => {
+                    if(data.success) location.reload();
+                    else alert("Error deleting.");
+                });
+            }
         }
     </script>
 </body>

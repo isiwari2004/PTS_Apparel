@@ -29,8 +29,9 @@ namespace PTS_Apparel.Controllers
             ViewBag.CanAdd = perms != null && perms.CanAdd;
             ViewBag.CanEdit = perms != null && perms.CanEdit;
 
-            // 1. Tabs සඳහා Factories ටික Factories Table එකෙන් ගන්නවා
-            var factories = _context.Factories
+            // 👇 ප්‍රධාන වෙනස: _context.Factories වෙනුවට _context.FactoryMasters
+            // 1. Tabs සඳහා Factories ටික FactoryMasters Table එකෙන් ගන්නවා
+            var factories = _context.FactoryMasters
                 .Select(f => f.FactoryName)
                 .Distinct()
                 .OrderBy(f => f)

@@ -9,7 +9,9 @@ namespace PTS_Apparel.Data
 
         public DbSet<User> Users { get; set; }
         public DbSet<ScreenPrivilege> ScreenPrivileges { get; set; }
-        public DbSet<Factory> Factories { get; set; }
+        public DbSet<FactoryMaster> FactoryMasters { get; set; }
+        public DbSet<FactoryDetail> FactoryDetails { get; set; }
+        public DbSet<FactoryProductionLine> FactoryProductionLines { get; set; }
         public DbSet<Customer> Customers { get; set; }
         public DbSet<Style> Styles { get; set; }
         public DbSet<PO> POs { get; set; }

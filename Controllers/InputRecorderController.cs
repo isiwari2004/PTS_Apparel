@@ -17,24 +17,105 @@ namespace PTS_Apparel.Controllers
             _context = context;
         }
 
-        // GET: Input Recorder Index
-        public IActionResult Index(string factoryFilter = "AVA")
+        // GET: Input Recorder List (Tabs, Search, Date Filter)
+        public IActionResult Index(string factoryFilter = "AVA", string searchTerm = "", string dateFilter = "")
         {
             if (HttpContext.Session.GetString("Username") == null)
                 return RedirectToAction("Login", "Account");
 
-            // Tabs සඳහා Factories ටික ගන්නවා
-            var factories = _context.Factories.Select(f => f.FactoryCode).Distinct().ToList();
-            ViewBag.Factories = factories;
-            ViewBag.CurrentFactory = factoryFilter;
+            // 1. Permission Check
+            var currentUserRole = HttpContext.Session.GetString("Role");
+            var perms = _context.ScreenPrivileges.FirstOrDefault(p => p.ModuleName == "Input Recorder" && p.Role == currentUserRole);
+            ViewBag.CanAdd = perms != null && perms.CanAdd;
+            ViewBag.CanEdit = perms != null && perms.CanEdit;
 
-            // අදාල Factory එකේ දත්ත විතරක් ගන්නවා
-            var records = _context.InputRecorders
-                .Where(r => r.FactoryName == factoryFilter)
-                .OrderBy(r => r.LineNo)
+            // 2. Tabs සඳහා Factory Codes ටික FactoryMaster Table එකෙන් ගන්නවා
+            var factories = _context.FactoryMasters
+                .Select(f => f.FactoryCode)
+                .Distinct()
+                .OrderBy(f => f)
                 .ToList();
+            ViewBag.Factories = factories;
+            
+            ViewBag.CurrentFactory = string.IsNullOrEmpty(factoryFilter) ? factories.FirstOrDefault() : factoryFilter;
+            ViewBag.CurrentSearch = searchTerm;
+            ViewBag.CurrentDate = dateFilter;
 
+            // 3. Base Query
+            var query = _context.InputRecorders.AsQueryable();
+
+            // 👇 ප්‍රධාන වෙනස: ViewBag.CurrentFactory dynamic එක string එකක් ලෙස අරගෙන filter කිරීම
+            var currentFactory = ViewBag.CurrentFactory as string;
+            if (!string.IsNullOrEmpty(currentFactory))
+            {
+                query = query.Where(r => r.FactoryName == currentFactory);
+            }
+
+            // 5. Search Filter (Line, PO, Style, Colour)
+            if (!string.IsNullOrWhiteSpace(searchTerm))
+            {
+                query = query.Where(r => r.LineNo.Contains(searchTerm) 
+                                    || r.PONo.Contains(searchTerm) 
+                                    || r.StyleNo.Contains(searchTerm) 
+                                    || r.Colour.Contains(searchTerm));
+            }
+
+            // 6. Date Filter
+            if (!string.IsNullOrWhiteSpace(dateFilter))
+            {
+                DateTime dt;
+                if (DateTime.TryParse(dateFilter, out dt))
+                {
+                    query = query.Where(r => r.RecordDate.Date == dt.Date);
+                }
+            }
+
+            // 7. Execute & Order
+            var records = query.OrderBy(r => r.LineNo).ToList();
             return View(records);
+        }
+
+        // POST: Add / Edit Input Recorder (Upsert)
+        [HttpPost]
+        public IActionResult Upsert([FromForm] InputRecorder record)
+        {
+            if (HttpContext.Session.GetString("Username") == null)
+                return Json(new { success = false, message = "Session expired" });
+
+            if (ModelState.IsValid)
+            {
+                if (record.Id == 0)
+                    _context.InputRecorders.Add(record);
+                else
+                    _context.InputRecorders.Update(record);
+
+                _context.SaveChanges();
+                return Json(new { success = true, message = "Saved successfully!" });
+            }
+            
+            var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage);
+            return Json(new { success = false, message = string.Join(", ", errors) });
+        }
+
+        // GET: Single Record for Edit (AJAX)
+        [HttpGet]
+        public IActionResult GetRecord(int id)
+        {
+            var record = _context.InputRecorders.Find(id);
+            if (record == null) return Json(new { success = false });
+            return Json(new { success = true, data = record });
+        }
+
+        // POST: Delete Record
+        [HttpPost]
+        public IActionResult Delete(int id)
+        {
+            var record = _context.InputRecorders.Find(id);
+            if (record == null) return Json(new { success = false });
+
+            _context.InputRecorders.Remove(record);
+            _context.SaveChanges();
+            return Json(new { success = true });
         }
     }
 }
