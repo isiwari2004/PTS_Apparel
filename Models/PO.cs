@@ -29,7 +29,7 @@ namespace PTS_Apparel.Models
         [Range(1, int.MaxValue, ErrorMessage = "Quantity must be at least 1")]
         public int Quantity { get; set; }
 
-        // 👇 මේ දෙක `?` (Nullable) ලෙස වෙනස් කරලා තියෙනවා
+       
         [Display(Name = "Tolerance (%)")]
         public decimal? Tolerance { get; set; }
 

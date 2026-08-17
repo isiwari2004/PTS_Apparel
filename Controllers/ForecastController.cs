@@ -29,8 +29,7 @@ namespace PTS_Apparel.Controllers
             ViewBag.CanAdd = perms != null && perms.CanAdd;
             ViewBag.CanEdit = perms != null && perms.CanEdit;
 
-            // 👇 ප්‍රධාන වෙනස: _context.Factories වෙනුවට _context.FactoryMasters
-            // 1. Tabs සඳහා Factories ටික FactoryMasters Table එකෙන් ගන්නවා
+           
             var factories = _context.FactoryMasters
                 .Select(f => f.FactoryName)
                 .Distinct()
@@ -41,13 +40,13 @@ namespace PTS_Apparel.Controllers
             ViewBag.CurrentSearch = searchTerm;
             ViewBag.CurrentDate = dateFilter;
 
-            // 2. Base Query (ඔක්කොම දත්ත)
+            // 2. Base Query 
             var query = _context.Forecasts.AsQueryable();
 
-            // 3. Factory Filter (Active Tab එකට අනුව)
+            // 3. Factory Filter 
             query = query.Where(f => f.FactoryName == factoryFilter);
 
-            // 4. Search Filter (Style Code හෝ Line No වලින් හොයනවා)
+            // 4. Search Filter 
             if (!string.IsNullOrWhiteSpace(searchTerm))
             {
                 query = query.Where(f => f.StyleCode.Contains(searchTerm) || f.LineNo.Contains(searchTerm));

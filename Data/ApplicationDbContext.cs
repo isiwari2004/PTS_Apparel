@@ -11,14 +11,14 @@ namespace PTS_Apparel.Data
         public DbSet<ScreenPrivilege> ScreenPrivileges { get; set; }
         public DbSet<FactoryMaster> FactoryMasters { get; set; }
         public DbSet<FactoryDetail> FactoryDetails { get; set; }
-        public DbSet<FactoryProductionLine> FactoryProductionLines { get; set; }
+        public DbSet<FactoryLine> FactoryLines { get; set; } 
         public DbSet<Customer> Customers { get; set; }
-        public DbSet<Style> Styles { get; set; }
         public DbSet<PO> POs { get; set; }
-
-        // 👇 මේ DbSet එක තමයි හරියට එකතු කරන්න ඕනේ
         public DbSet<Forecast> Forecasts { get; set; }
-
         public DbSet<InputRecorder> InputRecorders { get; set; }
+
+        
+        public DbSet<StyleMaster> StyleMasters { get; set; }
+        public DbSet<StyleDetail> StyleDetails { get; set; }
     }
 }

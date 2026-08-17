@@ -189,11 +189,13 @@
                     <label class="form-label">Style</label>
                     <select class="form-select" id="ddlStyle" name="StyleCode" required onchange="loadColors()">
                         <option value="">Select style</option>
+                        
+                        <!-- 👇 FIX: ViewBag.Styles එක List<StyleMaster> ලෙස ගන්නවා -->
                         @if (ViewBag.Styles != null)
                         {
-                            foreach (var style in ViewBag.Styles as List<string>)
+                            foreach (var style in ViewBag.Styles as List<PTS_Apparel.Models.StyleMaster>)
                             {
-                                <option value="@style">@style</option>
+                                <option value="@style.StyleCode">@style.StyleCode</option>
                             }
                         }
                     </select>

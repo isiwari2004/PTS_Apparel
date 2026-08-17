@@ -9,119 +9,54 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-            body {
-                display: flex;
-                background: #f4f6f9;
-                margin: 0;
-                font-family: 'Segoe UI';
-            }
+        body { display: flex; background: #f4f6f9; margin: 0; font-family: 'Segoe UI'; }
+        
+        /* Sidebar */
+        .sidebar { width: 250px; background-color: #1e3250; color: white; height: 100vh; padding: 20px; position: fixed; top:0; left:0; overflow-y: auto; z-index: 999; }
+        .sidebar a { color: #a4b6d4; text-decoration: none; display: block; padding: 10px; border-radius: 5px; margin-bottom: 5px; }
+        .sidebar a:hover, .sidebar a.active { background: rgba(255,255,255,0.1); color: white; }
+        .content { margin-left: 250px; padding: 30px; flex:1; }
+        
+        /* Toolbar */
+        .toolbar { background: white; padding: 12px 20px; border-radius: 10px; border: 1px solid #eef2f6; display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 20px; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+        .toolbar-input-group { display: flex; flex: 1; min-width: 200px; }
+        .toolbar-input-group .input-group-text { background: #f8f9fa; border: 1px solid #eef2f6; border-right: none; border-radius: 6px 0 0 6px; color: #999; }
+        .toolbar-input-group input { border: 1px solid #eef2f6; border-left: none; border-radius: 0 6px 6px 0; background: #f8f9fa; padding: 8px 12px; }
+        .btn-dark-custom { background-color: #203455; color: white; border: none; border-radius: 6px; padding: 7px 18px; font-weight: 500; transition: 0.2s; }
+        .btn-dark-custom:hover { background-color: #14263f; color: white; }
+        .btn-add { background-color: #203455; color: white; border: none; border-radius: 6px; padding: 7px 18px; display: flex; align-items: center; gap: 6px; }
+        
+        /* Table */
+        .table-wrap { background: white; border-radius: 12px; border: 1px solid #eef2f6; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+        .table-custom { width: 100%; border-collapse: collapse; font-size: 14px; }
+        .table-custom thead { background: #203455; color: white; }
+        .table-custom thead th { padding: 15px 20px; font-weight: 600; font-size: 13px; text-align: left; letter-spacing: 0.5px; }
+        .table-custom tbody td { padding: 16px 20px; border-bottom: 1px solid #f1f4f8; color: #333; }
+        .table-custom tbody tr:last-child td { border-bottom: none; }
+        .table-custom tbody tr:hover { background: #f8faff; }
 
-            .sidebar {
-                width: 250px;
-                background-color: #1e3250;
-                color: white;
-                height: 100vh;
-                padding: 20px;
-                position: fixed;
-                top: 0;
-                left: 0;
-                overflow-y: auto;
-                z-index: 999;
-            }
+        /* ==========================================
+           POPUP MODAL UI (Add PO)
+           ========================================== */
+        .modal-xl-custom { max-width: 900px; }
+        .modal-header { background: #f8fafc; border-bottom: 1px solid #eef2f6; }
+        .modal-footer { border-top: 1px solid #eef2f6; }
+        .modal-body-scroll { max-height: 70vh; overflow-y: auto; padding: 20px 30px; }
+        
+        .form-label { font-weight: 600; color: #1e3250; font-size: 14px; margin-bottom: 5px; }
+        .form-control, .form-select { border-radius: 8px; padding: 10px 15px; }
+        .size-input { width: 70px; text-align: center; border: 1px solid #e0e0e0; border-radius: 4px; padding: 4px; }
+        .size-table-modal { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        .size-table-modal th { background: #f8fafc; padding: 10px; border-bottom: 1px solid #eef2f6; text-align: left; font-weight: 600; }
+        .size-table-modal td { padding: 10px; border-bottom: 1px solid #f1f4f8; }
+        .empty-state-row td { padding: 30px 0; color: #999; text-align: center; }
+        .total-box-modal { background: #f8fafc; border: 1px solid #eef2f6; border-radius: 8px; padding: 10px 20px; display: flex; justify-content: space-between; margin-top: 15px; }
 
-                .sidebar a {
-                    color: #a4b6d4;
-                    text-decoration: none;
-                    display: block;
-                    padding: 10px;
-                    border-radius: 5px;
-                    margin-bottom: 5px;
-                }
-
-                    .sidebar a:hover, .sidebar a.active {
-                        background: rgba(255,255,255,0.1);
-                        color: white;
-                    }
-
-            .green-icon {
-                color: #2ecc71;
-            }
-
-            .content {
-                margin-left: 250px;
-                padding: 30px;
-                flex: 1;
-            }
-
-            .search-bar {
-                background: white;
-                padding: 15px;
-                border-radius: 10px;
-                border: 1px solid #eef2f6;
-                display: flex;
-                flex-wrap: wrap;
-                gap: 15px;
-                margin-bottom: 25px;
-            }
-
-            .btn-dark-custom {
-                background-color: #203455;
-                color: white;
-                border: none;
-                border-radius: 6px;
-                padding: 8px 16px;
-            }
-
-            .btn-outline-custom {
-                border: 1px solid #ced4da;
-                background: white;
-                border-radius: 6px;
-                padding: 7px 15px;
-                color: #555;
-            }
-
-            .table-container {
-                background: white;
-                border-radius: 12px;
-                border: 1px solid #eef2f6;
-                overflow: hidden;
-            }
-
-            .custom-table {
-                width: 100%;
-                border-collapse: collapse;
-                font-size: 14px;
-            }
-
-                .custom-table thead {
-                    background: #f8fafc;
-                    border-bottom: 1px solid #eef2f6;
-                }
-
-                .custom-table th {
-                    text-align: left;
-                    padding: 15px 20px;
-                    font-weight: 600;
-                    font-size: 11px;
-                    letter-spacing: 0.5px;
-                    color: #778ca2;
-                    text-transform: uppercase;
-                }
-
-                .custom-table td {
-                    padding: 20px;
-                    border-bottom: 1px solid #f1f4f8;
-                }
-
-            .action-icons a {
-                color: #778ca2;
-                margin: 0 5px;
-                cursor: pointer;
-            }
-
-                .action-icons a:hover {
-                    color: #203455;
-                }
+        @@media (max-width: 768px) { 
+            .sidebar { display: none; } 
+            .content { margin-left: 0; width: 100%; padding: 15px; }
+            .toolbar { flex-direction: column; align-items: stretch; }
+        }
     </style>
 </head>
 <body>
@@ -134,7 +69,7 @@
         <a href="/Style/Index"><i class="fas fa-tshirt"></i> Style</a>
         <a href="/POManagement/Index" class="active"><i class="fas fa-file-invoice"></i> PO</a>
         <a href="/InputRecorder/Index"><i class="fas fa-clipboard-list"></i> Input Recorder</a>
-        <a href="#"><i class="fas fa-chart-line"></i> Forecast</a>
+        <a href="/Forecast/Index"><i class="fas fa-chart-line"></i> Forecast</a>
         <a href="#"><i class="fas fa-list-ul"></i> Line Recorder</a>
         <a href="#"><i class="fas fa-clock"></i> Hourly Tracking</a>
         <a href="#"><i class="fas fa-exclamation-triangle"></i> Defect Report</a>
@@ -148,30 +83,26 @@
     </div>
 
     <div class="content">
-        <div class="d-flex justify-content-between align-items-start mb-3">
-            <div>
-                <h4>PO Management</h4>
-                <p class="text-muted">Manage purchase orders, customer styles, colours, and production quantities</p>
-            </div>
+        <div class="page-header mb-3">
+            <h4>PO Management</h4>
+            <p class="text-muted">Manage purchase orders, customer styles, colours, and production quantities</p>
         </div>
 
-        <div class="search-bar">
-            <div class="input-group" style="flex:1;">
+        <div class="toolbar">
+            <div class="toolbar-input-group">
+                <span class="input-group-text"><i class="fas fa-search"></i></span>
                 <input type="text" id="searchInput" class="form-control" placeholder="Search PO...">
             </div>
             <button class="btn-dark-custom" onclick="searchPOs()">Search</button>
-            <button class="btn-outline-custom" onclick="location.reload()"><i class="fas fa-sync-alt me-1"></i> Refresh</button>
+            <button class="btn btn-outline-secondary" onclick="location.reload()">Refresh</button>
             @if (ViewBag.CanAdd != null && ViewBag.CanAdd == true)
             {
-                <!-- Add PO button එක AddPO එකට යන විදියට -->
-                <button class="btn-dark-custom" style="margin-left: auto;" onclick="window.location.href='/POManagement/AddPO'">
-                    <i class="fas fa-plus"></i> Add PO
-                </button>
+                <button class="btn-add" onclick="openAddModal()">Add PO</button>
             }
         </div>
 
-        <div class="table-container">
-            <table class="custom-table">
+        <div class="table-wrap">
+            <table class="table-custom">
                 <thead>
                     <tr>
                         <th>PO NUMBER</th>
@@ -182,95 +113,362 @@
                         <th>QUANTITY</th>
                         @if (ViewBag.CanEdit != null && ViewBag.CanEdit == true)
                         {
-                            <th style="text-align: right; padding-right: 30px;">ACTIONS</th>
+                            <th style="text-align: right; padding-right: 20px;">ACTIONS</th>
                         }
                     </tr>
                 </thead>
                 <tbody id="poTableBody">
-                    @foreach (var item in Model)
+                    @if (Model != null && Model.Count > 0)
                     {
-                        <tr id="row-@item.Id">
-                            <td><strong>@item.PONumber</strong></td>
-                            <td>@item.Customer</td>
-                            <td>@item.Style</td>
-                            <td>@item.Color</td>
-                            <td>
-                                @if(item.Tolerance.HasValue)
-                                {
-                                    <text>@item.Tolerance.Value.ToString("0")%</text>
-                                }
-                                else
-                                {
-                                    <text>-</text>
-                                }
-                            </td>
-                            <td>@item.Quantity</td>
-                            @if (ViewBag.CanEdit != null && ViewBag.CanEdit == true)
-                            {
-                                <td style="text-align: right; padding-right: 30px;">
-                                    <div class="action-icons">
-                                        <a onclick="window.location.href='/POManagement/Upsert?id=@item.Id'"><i class="fas fa-pen"></i></a>
-                                        <a class="btn-delete" onclick="deletePO(@item.Id)"><i class="fas fa-trash-alt"></i></a>
-                                    </div>
+                        @foreach (var item in Model)
+                        {
+                            <tr id="row-@item.Id">
+                                <td><strong>@item.PONumber</strong></td>
+                                <td>@item.Customer</td>
+                                <td>@item.Style</td>
+                                <td>@item.Color</td>
+                                <td>
+                                    @if(item.Tolerance.HasValue)
+                                    {
+                                        <text>@item.Tolerance.Value.ToString("0")%</text>
+                                    }
+                                    else
+                                    {
+                                        <text>-</text>
+                                    }
                                 </td>
-                            }
-                        </tr>
+                                <td>@item.Quantity</td>
+                                @if (ViewBag.CanEdit != null && ViewBag.CanEdit == true)
+                                {
+                                    <td style="text-align: right; padding-right: 20px;">
+                                        <div class="action-icons">
+                                            <a onclick="openEditModal(@item.Id)"><i class="fas fa-pen"></i></a>
+                                            <a class="btn-delete" onclick="deletePO(@item.Id)"><i class="fas fa-trash-alt"></i></a>
+                                        </div>
+                                    </td>
+                                }
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr><td colspan="7" class="text-center py-5 text-muted">No PO records found.</td></tr>
                     }
                 </tbody>
             </table>
         </div>
     </div>
 
+    <!-- ==================== POPUP MODAL (Add / Edit PO) ==================== -->
+    <div class="modal fade" id="poModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-xl-custom modal-dialog-centered">
+            <div class="modal-content" style="border-radius: 12px; border: none; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalTitle"><i class="fas fa-plus-circle me-2 text-success"></i> Add PO</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body-scroll">
+                    <form id="poForm">
+                        <input type="hidden" id="edit_Id" name="Id" value="0" />
+                        
+                        <div class="mb-3">
+                            <label class="form-label">PO Number</label>
+                            <input type="text" class="form-control" id="edit_PONumber" name="PONumber" placeholder="e.g. PO 137009" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Style</label>
+                            <select class="form-select" id="edit_StyleCode" name="StyleCode" required onchange="loadColorsModal()">
+                                <option value="">Select style</option>
+                                @if (ViewBag.Styles != null)
+                                {
+                                    foreach (var style in ViewBag.Styles as List<PTS_Apparel.Models.StyleMaster>)
+                                    {
+                                        <option value="@style.StyleCode">@style.StyleCode</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Colour</label>
+                                <select class="form-select" id="edit_ColorCode" name="ColorCode" required onchange="loadSizeTableModal()">
+                                    <option value="">Select colour</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Tolerance</label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control" id="edit_Tolerance" name="Tolerance" value="5" min="0" max="100" step="1" oninput="calculateTotalsModal()">
+                                    <span class="input-group-text">%</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Size Breakdown</label>
+                            <table class="size-table-modal">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 30%;">SIZE</th>
+                                        <th style="width: 35%;">TOLERANCE QTY</th>
+                                        <th style="width: 35%;">FINAL QUANTITY</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="sizeTableBodyModal">
+                                    <tr class="empty-state-row">
+                                        <td colspan="3">
+                                            <div class="icon-bg"><i class="fas fa-cube fa-2x text-muted"></i></div>
+                                            <h6 style="color:#333;">No sizes loaded</h6>
+                                            <p style="font-size: 13px;">Select a style and colour to populate size rows.</p>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="total-box-modal">
+                            <div><i class="fas fa-cube me-2 text-muted"></i> Total Order Quantity</div>
+                            <div>Final: <strong id="totalFinalQtyModal" style="color:#1e3250; font-size: 18px;">0</strong> pcs</div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn-dark-custom" onclick="savePOModal()"><i class="fas fa-save me-2"></i> Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== SCRIPTS ==================== -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        var poModal = null;
+        var modalSizes = [];
+
+        // --- Open Add Modal ---
+        function openAddModal() {
+            document.getElementById('modalTitle').innerHTML = '<i class="fas fa-plus-circle me-2 text-success"></i> Add PO';
+            document.getElementById('edit_Id').value = 0;
+            document.getElementById('edit_PONumber').value = '';
+            document.getElementById('edit_StyleCode').value = '';
+            document.getElementById('edit_ColorCode').innerHTML = '<option value="">Select colour</option>';
+            document.getElementById('edit_Tolerance').value = 5;
+            document.getElementById('sizeTableBodyModal').innerHTML = `
+                <tr class="empty-state-row">
+                    <td colspan="3">
+                        <div class="icon-bg"><i class="fas fa-cube fa-2x text-muted"></i></div>
+                        <h6 style="color:#333;">No sizes loaded</h6>
+                        <p style="font-size: 13px;">Select a style and colour to populate size rows.</p>
+                    </td>
+                </tr>
+            `;
+            document.getElementById('totalFinalQtyModal').innerText = '0';
+            modalSizes = [];
+
+            poModal = new bootstrap.Modal(document.getElementById('poModal'));
+            poModal.show();
+        }
+
+        // --- Open Edit Modal ---
+        function openEditModal(id) {
+            fetch(`/POManagement/GetPO?id=${id}`)
+            .then(r => r.json())
+            .then(res => {
+                if(res.success) {
+                    var data = res.data;
+                    document.getElementById('modalTitle').innerHTML = '<i class="fas fa-edit me-2 text-warning"></i> Edit PO';
+                    document.getElementById('edit_Id').value = data.id;
+                    document.getElementById('edit_PONumber').value = data.ponumber;
+                    document.getElementById('edit_StyleCode').value = data.style;
+                    document.getElementById('edit_Tolerance').value = data.tolerance || 5;
+                    
+                    // Load Colors for the existing style
+                    loadColorsModal();
+
+                    // Load Sizes and Table
+                    if(data.sizeBreakdownJson) {
+                        try {
+                            var parsedSizes = JSON.parse(data.sizeBreakdownJson);
+                            modalSizes = parsedSizes;
+                            renderSizeTableModal();
+                        } catch(e) {
+                            modalSizes = [];
+                            renderSizeTableModal();
+                        }
+                    } else {
+                        modalSizes = [];
+                        renderSizeTableModal();
+                    }
+
+                    poModal = new bootstrap.Modal(document.getElementById('poModal'));
+                    poModal.show();
+                }
+            });
+        }
+
+        // --- Load Colors based on Style ---
+        function loadColorsModal() {
+            var styleCode = document.getElementById('edit_StyleCode').value;
+            var colorDdl = document.getElementById('edit_ColorCode');
+            
+            colorDdl.innerHTML = '<option value="">Select colour</option>';
+            modalSizes = [];
+            renderSizeTableModal();
+
+            if (!styleCode) return;
+
+            fetch(`/POManagement/GetColorsByStyle?styleCode=${encodeURIComponent(styleCode)}`)
+            .then(r => r.json())
+            .then(data => {
+                data.forEach(color => {
+                    var opt = document.createElement('option');
+                    opt.value = color;
+                    opt.innerText = color;
+                    colorDdl.appendChild(opt);
+                });
+            });
+        }
+
+        // --- Load Size Table based on Style and Color ---
+        function loadSizeTableModal() {
+            var styleCode = document.getElementById('edit_StyleCode').value;
+            var colorCode = document.getElementById('edit_ColorCode').value;
+
+            if (!styleCode || !colorCode) {
+                modalSizes = [];
+                renderSizeTableModal();
+                return;
+            }
+
+            fetch(`/POManagement/GetSizesByStyleAndColor?styleCode=${encodeURIComponent(styleCode)}&colorCode=${encodeURIComponent(colorCode)}`)
+            .then(r => r.json())
+            .then(data => {
+                modalSizes = data.map(s => ({ SizeName: s, ToleranceQty: 0, FinalQuantity: 0 }));
+                renderSizeTableModal();
+            });
+        }
+
+        // --- Render Size Table ---
+        function renderSizeTableModal() {
+            var tbody = document.getElementById('sizeTableBodyModal');
+            var tolerance = parseFloat(document.getElementById('edit_Tolerance').value) || 0;
+
+            if (!modalSizes || modalSizes.length === 0) {
+                tbody.innerHTML = `<tr class="empty-state-row"><td colspan="3"><h6 style="color:#333;">No sizes loaded</h6><p style="font-size: 13px;">Select a style and colour to populate size rows.</p></td></tr>`;
+                document.getElementById('totalFinalQtyModal').innerText = '0';
+                return;
+            }
+
+            tbody.innerHTML = '';
+            modalSizes.forEach((item, index) => {
+                var finalQty = Math.round(item.ToleranceQty + (item.ToleranceQty * (tolerance / 100)));
+                var row = `
+                    <tr>
+                        <td><strong>${item.SizeName}</strong></td>
+                        <td>
+                            <input type="number" class="size-input tolerance-qty" value="${item.ToleranceQty}" 
+                                   oninput="updateRowFinal(this, ${index})" />
+                        </td>
+                        <td>
+                            <input type="number" class="size-input final-qty" value="${finalQty}" readonly />
+                        </td>
+                    </tr>
+                `;
+                tbody.innerHTML += row;
+            });
+            calculateTotalsModal();
+        }
+
+        // --- Update Row Final Quantity ---
+        function updateRowFinal(inputElement, index) {
+            var tolerance = parseFloat(document.getElementById('edit_Tolerance').value) || 0;
+            var orderQty = parseInt(inputElement.value) || 0;
+            
+            modalSizes[index].ToleranceQty = orderQty;
+            var finalQty = Math.round(orderQty + (orderQty * (tolerance / 100)));
+            
+            var row = inputElement.closest('tr');
+            var finalInput = row.querySelector('.final-qty');
+            finalInput.value = finalQty;
+            modalSizes[index].FinalQuantity = finalQty;
+            
+            calculateTotalsModal();
+        }
+
+        // --- Calculate Grand Total ---
+        function calculateTotalsModal() {
+            var total = modalSizes.reduce((sum, item) => sum + (item.FinalQuantity || 0), 0);
+            document.getElementById('totalFinalQtyModal').innerText = total;
+        }
+
+        // --- Save PO Modal ---
+        function savePOModal() {
+            var poNumber = document.getElementById('edit_PONumber').value.trim();
+            var styleCode = document.getElementById('edit_StyleCode').value;
+            var colorCode = document.getElementById('edit_ColorCode').value;
+            var tolerance = parseFloat(document.getElementById('edit_Tolerance').value) || 0;
+
+            if (!poNumber || !styleCode || !colorCode) {
+                alert("Please fill in PO Number, Style, and Colour.");
+                return;
+            }
+            if (!modalSizes || modalSizes.length === 0) {
+                alert("Please select a Style and Colour to load sizes.");
+                return;
+            }
+
+            var payload = {
+                PONumber: poNumber,
+                StyleCode: styleCode,
+                ColorCode: colorCode,
+                Tolerance: tolerance,
+                SizeDetails: modalSizes
+            };
+
+            fetch("/POManagement/SavePO", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    poModal.hide();
+                    location.reload();
+                } else {
+                    alert("Error: " + data.message);
+                }
+            })
+            .catch(error => console.error("Error saving PO:", error));
+        }
+
+        // --- Search & Delete functions ---
         function searchPOs() {
             var term = document.getElementById('searchInput').value.trim();
             fetch(`/POManagement/Search?searchTerm=${encodeURIComponent(term)}`)
-            .then(r => r.json())
-            .then(data => {
+            .then(r => r.json()).then(data => {
                 var tbody = document.getElementById('poTableBody');
                 tbody.innerHTML = '';
-                
-                // දත්ත නැත්නම් "No records found" පෙන්වන්න
-                if (!data || data.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-muted">No records found.</td></tr>`;
-                    return;
-                }
-
                 data.forEach(item => {
-                    // 🔥 Universal Fix: කුඩා අකුරු හෝ ලොකු අකුරු දෙකම හසුරුවන ආරක්ෂිත කේතය
-                    var poNumber = item.ponumber || item.PONumber || item.poNumber || '-';
-                    var customer = item.customer || item.Customer || '-';
-                    var style = item.style || item.Style || '-';
-                    var color = item.color || item.Color || '-';
-                    var quantity = item.quantity || item.Quantity || 0;
-                    var tolerance = item.tolerance || item.Tolerance || null;
-                    var id = item.id || item.Id || 0;
-
-                    var toleranceDisplay = tolerance ? tolerance + '%' : '-';
-
-                    var row = `
-                        <tr id="row-${id}">
-                            <td><strong>${poNumber}</strong></td>
-                            <td>${customer}</td>
-                            <td>${style}</td>
-                            <td>${color}</td>
-                            <td>${toleranceDisplay}</td>
-                            <td>${quantity}</td>
-                            <td style="text-align: right; padding-right: 30px;">
-                                <div class="action-icons">
-                                    <a onclick="window.location.href='/POManagement/Upsert?id=${id}'"><i class="fas fa-pen"></i></a>
-                                    <a class="btn-delete" onclick="deletePO(${id})"><i class="fas fa-trash-alt"></i></a>
-                                </div>
-                            </td>
-                        </tr>
-                    `;
+                    var row = `<tr id="row-${item.id}">
+                        <td><strong>${item.ponumber}</strong></td>
+                        <td>${item.customer}</td>
+                        <td>${item.style}</td>
+                        <td>${item.color}</td>
+                        <td>${item.tolerance ? item.tolerance + '%' : '-'}</td>
+                        <td>${item.quantity}</td>
+                        <td style="text-align: right; padding-right: 20px;">
+                            <div class="action-icons">
+                                <a onclick="openEditModal(${item.id})"><i class="fas fa-pen"></i></a>
+                                <a class="btn-delete" onclick="deletePO(${item.id})"><i class="fas fa-trash-alt"></i></a>
+                            </div>
+                        </td>
+                    </tr>`;
                     tbody.innerHTML += row;
                 });
-            })
-            .catch(error => {
-                console.error("Error fetching data:", error);
-                alert("Search failed. Please check console for details.");
             });
         }
 

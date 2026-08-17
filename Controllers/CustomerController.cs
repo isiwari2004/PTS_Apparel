@@ -4,6 +4,7 @@ using PTS_Apparel.Models;
 using Microsoft.AspNetCore.Http;
 using System.Linq;
 using System.Collections.Generic;
+using System.Text.Json;
 
 namespace PTS_Apparel.Controllers
 {
@@ -22,7 +23,6 @@ namespace PTS_Apparel.Controllers
             if (HttpContext.Session.GetString("Username") == null)
                 return RedirectToAction("Login", "Account");
 
-            // 1. Permission Check
             var currentUserRole = HttpContext.Session.GetString("Role");
             var perms = _context.ScreenPrivileges.FirstOrDefault(p => p.ModuleName == "Customer" && p.Role == currentUserRole);
 
@@ -30,29 +30,24 @@ namespace PTS_Apparel.Controllers
             ViewBag.CanEdit = perms != null && perms.CanEdit;
             ViewBag.CanDelete = perms != null && perms.CanDelete;
 
-            // 2. Base Query
             var query = _context.Customers.AsQueryable();
 
-            // 3. Apply Search
             if (!string.IsNullOrWhiteSpace(searchTerm))
             {
                 query = query.Where(c => c.CustomerName.Contains(searchTerm) || c.CustomerType.Contains(searchTerm));
                 ViewBag.CurrentSearch = searchTerm;
             }
 
-            // 4. Pagination Settings
-            int pageSize = 10; // එක පිටුවකට දත්ත 10ක්
+            int pageSize = 10;
             int totalRecords = query.Count();
             int totalPages = (int)Math.Ceiling((double)totalRecords / pageSize);
 
-            // Page එක අංකය අනුව දත්ත ටික ගන්නවා
             var customers = query
                 .OrderBy(c => c.CustomerName)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .ToList();
 
-            // 5. Pass Pagination Data to View using ViewBag
             ViewBag.CurrentPage = page;
             ViewBag.TotalPages = totalPages;
             ViewBag.PageSize = pageSize;
@@ -62,7 +57,7 @@ namespace PTS_Apparel.Controllers
 
         // POST: Create New Customer
         [HttpPost]
-        public IActionResult Create(Customer customer)
+        public IActionResult Create([FromForm] Customer customer)
         {
             if (HttpContext.Session.GetString("Username") == null)
                 return Json(new { success = false, message = "Session expired. Please login again." });
@@ -93,7 +88,7 @@ namespace PTS_Apparel.Controllers
 
         // POST: Update Customer (Edit)
         [HttpPost]
-        public IActionResult Edit(Customer customer)
+        public IActionResult Edit([FromForm] Customer customer)
         {
             if (HttpContext.Session.GetString("Username") == null)
                 return Json(new { success = false, message = "Session expired. Please login again." });
@@ -133,17 +128,59 @@ namespace PTS_Apparel.Controllers
             return Json(new { success = true, message = "Customer deleted successfully!" });
         }
 
-        // GET: Search Customers (AJAX) - Pagination නැතුව JSON ආකාරයෙන් Data ටික යවන්න
+        // GET: Search Customers (AJAX)
         [HttpGet]
         public IActionResult Search(string searchTerm)
         {
-            if (string.IsNullOrWhiteSpace(searchTerm))
-                return Json(_context.Customers.ToList());
+            List<dynamic> results;
 
-            var results = _context.Customers
-                .Where(c => c.CustomerName.Contains(searchTerm) || c.CustomerType.Contains(searchTerm))
+            if (string.IsNullOrWhiteSpace(searchTerm))
+            {
+                results = _context.Customers
+                    .Select(c => new
+                    {
+                        Id = c.Id,
+                        CustomerName = c.CustomerName,
+                        CustomerType = c.CustomerType
+                    })
+                    .ToList<dynamic>();
+            }
+            else
+            {
+                results = _context.Customers
+                    .Where(c => c.CustomerName.Contains(searchTerm) || c.CustomerType.Contains(searchTerm))
+                    .Select(c => new
+                    {
+                        Id = c.Id,
+                        CustomerName = c.CustomerName,
+                        CustomerType = c.CustomerType
+                    })
+                    .ToList<dynamic>();
+            }
+
+            var jsonOptions = new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = null
+            };
+
+            return Json(results, jsonOptions);
+        }
+
+        // GET: Get All Customers (for Dropdown)
+        [HttpGet]
+        public IActionResult GetAllCustomers()
+        {
+            var customers = _context.Customers
+                .Select(c => new
+                {
+                    Id = c.Id,
+                    CustomerName = c.CustomerName,
+                    CustomerType = c.CustomerType
+                })
+                .OrderBy(c => c.CustomerName)
                 .ToList();
-            return Json(results);
+
+            return Json(customers);
         }
     }
 }
