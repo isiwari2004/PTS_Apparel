@@ -26,7 +26,9 @@ namespace PTS_Apparel.Models
         [Range(1, 100, ErrorMessage = "Invalid number")]
         public int ProdLines { get; set; }
 
-        // Navigation Property (FactoryMaster එකට සම්බන්ධ වීමට)
+        [Display(Name = "Created At")]
+        public DateTime CreatedAt { get; set; } = DateTime.Now;
+
         [JsonIgnore]
         public virtual FactoryMaster FactoryMaster { get; set; }
     }

@@ -1,8 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Collections.Generic;
 
 namespace PTS_Apparel.Models
 {
-    public class Style
+    public class StyleMaster
     {
         [Key]
         public int Id { get; set; }
@@ -15,12 +16,8 @@ namespace PTS_Apparel.Models
         [Required(ErrorMessage = "Style Code is required")]
         public string StyleCode { get; set; }
 
-        [Display(Name = "Color Code")]
-        [Required(ErrorMessage = "Color Code is required")]
-        public string ColorCode { get; set; }
+        public DateTime CreatedAt { get; set; }
 
-        [Display(Name = "Sizes")]
-        [Required(ErrorMessage = "Sizes are required")]
-        public string Sizes { get; set; } 
+        public virtual ICollection<StyleDetail> StyleDetails { get; set; }
     }
 }

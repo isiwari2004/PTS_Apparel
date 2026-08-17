@@ -4,6 +4,7 @@ using PTS_Apparel.Models;
 using Microsoft.AspNetCore.Http;
 using System.Linq;
 using System.Collections.Generic;
+using System.Text.Json; 
 
 namespace PTS_Apparel.Controllers
 {
@@ -23,7 +24,6 @@ namespace PTS_Apparel.Controllers
                 return RedirectToAction("Login", "Account");
 
             var currentUserRole = HttpContext.Session.GetString("Role");
-
             var perms = _context.ScreenPrivileges.FirstOrDefault(p => p.ModuleName == "Factory" && p.Role == currentUserRole);
 
             ViewBag.CanViewFactory = perms != null && perms.CanView;
@@ -31,10 +31,9 @@ namespace PTS_Apparel.Controllers
             ViewBag.CanEditFactory = perms != null && perms.CanEdit;
             ViewBag.CanDeleteFactory = perms != null && perms.CanDelete;
 
-            // Join කිරීමෙන් Master සහ Details දත්ත එකට ගන්නවා
             var factories = (from m in _context.FactoryMasters
                              join d in _context.FactoryDetails on m.Id equals d.FactoryMasterId
-                             select new 
+                             select new
                              {
                                  Id = m.Id,
                                  FactoryCode = m.FactoryCode,
@@ -47,7 +46,7 @@ namespace PTS_Apparel.Controllers
             return View(factories);
         }
 
-        // POST: Create New Factory (Add Master + Details + Production Lines)
+        // POST: Create New Factory (Add Master + Details + Factory Lines)
         [HttpPost]
         public IActionResult Create([FromForm] FactoryMaster master, [FromForm] int WorkingHours, [FromForm] decimal CycleTime, [FromForm] int ProdLines, [FromForm] List<string> LineNames)
         {
@@ -59,7 +58,6 @@ namespace PTS_Apparel.Controllers
             if (addPerm == null || !addPerm.CanAdd)
                 return Json(new { success = false, message = "You do not have permission to add factories." });
 
-            // FactoryCode Check කිරීම
             var existing = _context.FactoryMasters.FirstOrDefault(f => f.FactoryCode == master.FactoryCode);
             if (existing != null)
                 return Json(new { success = false, message = "Factory Code already exists." });
@@ -67,35 +65,37 @@ namespace PTS_Apparel.Controllers
             try
             {
                 // 1. Save Master
+                master.CreatedAt = DateTime.Now;
                 _context.FactoryMasters.Add(master);
-                _context.SaveChanges(); // මෙතනින් master.Id එක generate වෙනවා
+                _context.SaveChanges();
 
-                // 2. Save Details (මෙතන master.Id එක පාවිච්චි කරනවා)
+                // 2. Save Details
                 var detail = new FactoryDetail
                 {
                     FactoryMasterId = master.Id,
                     WorkingHours = WorkingHours,
                     CycleTime = CycleTime,
-                    ProdLines = ProdLines
+                    ProdLines = ProdLines,
+                    CreatedAt = DateTime.Now
                 };
                 _context.FactoryDetails.Add(detail);
                 _context.SaveChanges();
 
-                // 🚀 3. Save Production Lines (User ටයිප් කරපු නම් ටික Save වෙයි)
+                // 3. Save Factory Lines 
                 if (LineNames != null && LineNames.Count > 0)
                 {
                     for (int i = 0; i < LineNames.Count; i++)
                     {
-                        // User ලා හිස් අකුරු දැම්මොත් අපි Default එකක් දාමු
                         var nameToSave = string.IsNullOrWhiteSpace(LineNames[i]) ? "Line " + (i + 1) : LineNames[i].Trim();
 
-                        var newLine = new FactoryProductionLine
+                        var newLine = new FactoryLine
                         {
                             FactoryMasterId = master.Id,
                             LineNumber = i + 1,
-                            LineName = nameToSave
+                            LineName = nameToSave,
+                            CreatedAt = DateTime.Now
                         };
-                        _context.FactoryProductionLines.Add(newLine);
+                        _context.FactoryLines.Add(newLine);
                     }
                     _context.SaveChanges();
                 }
@@ -108,7 +108,7 @@ namespace PTS_Apparel.Controllers
             }
         }
 
-        // GET: Edit Factory (AJAX) - Master සහ Details දෙකම ගන්නවා
+        // GET: Edit Factory (AJAX)
         [HttpGet]
         public IActionResult Edit(int id)
         {
@@ -131,11 +131,11 @@ namespace PTS_Apparel.Controllers
             return Json(new { success = true, data = factoryData });
         }
 
-        // GET: Get Existing Lines for Edit (AJAX) - මේක Edit කරනකොට හිටපු line names ටික ගන්න
+        // GET: Get Existing Lines for Edit (AJAX) 
         [HttpGet]
         public IActionResult GetLines(int factoryMasterId)
         {
-            var lines = _context.FactoryProductionLines
+            var lines = _context.FactoryLines
                                 .Where(l => l.FactoryMasterId == factoryMasterId)
                                 .OrderBy(l => l.LineNumber)
                                 .Select(l => l.LineName)
@@ -143,7 +143,7 @@ namespace PTS_Apparel.Controllers
             return Json(lines);
         }
 
-        // POST: Update Factory (Edit Master + Details)
+        // POST: Update Factory (Edit Master + Details + Lines)
         [HttpPost]
         public IActionResult Edit([FromForm] int Id, [FromForm] string FactoryCode, [FromForm] string FactoryName, [FromForm] int WorkingHours, [FromForm] decimal CycleTime, [FromForm] int ProdLines, [FromForm] List<string> LineNames)
         {
@@ -157,21 +157,17 @@ namespace PTS_Apparel.Controllers
 
             try
             {
-                // 1. Find Master
                 var master = _context.FactoryMasters.Find(Id);
                 if (master == null) return Json(new { success = false, message = "Factory Master not found." });
 
-                // Check Duplicate Code
                 var existing = _context.FactoryMasters.FirstOrDefault(f => f.FactoryCode == FactoryCode && f.Id != Id);
                 if (existing != null)
                     return Json(new { success = false, message = "Factory Code already exists." });
 
-                // 2. Update Master
                 master.FactoryCode = FactoryCode;
                 master.FactoryName = FactoryName;
                 _context.FactoryMasters.Update(master);
 
-                // 3. Find and Update Details
                 var detail = _context.FactoryDetails.FirstOrDefault(d => d.FactoryMasterId == Id);
                 if (detail != null)
                 {
@@ -181,10 +177,9 @@ namespace PTS_Apparel.Controllers
                     _context.FactoryDetails.Update(detail);
                 }
 
-                // 🚀 4. Update Production Lines (Delete existing, then add new ones)
-                // Edit කරනකොට හිටපු lines ටික මකලා අලුත් ඒවා දානවා
-                var existingLines = _context.FactoryProductionLines.Where(l => l.FactoryMasterId == Id).ToList();
-                _context.FactoryProductionLines.RemoveRange(existingLines);
+                // 🚀 Update Factory Lines (Delete existing, then add new ones)
+                var existingLines = _context.FactoryLines.Where(l => l.FactoryMasterId == Id).ToList();
+                _context.FactoryLines.RemoveRange(existingLines);
 
                 if (LineNames != null && LineNames.Count > 0)
                 {
@@ -192,13 +187,14 @@ namespace PTS_Apparel.Controllers
                     {
                         var nameToSave = string.IsNullOrWhiteSpace(LineNames[i]) ? "Line " + (i + 1) : LineNames[i].Trim();
 
-                        var newLine = new FactoryProductionLine
+                        var newLine = new FactoryLine
                         {
                             FactoryMasterId = Id,
                             LineNumber = i + 1,
-                            LineName = nameToSave
+                            LineName = nameToSave,
+                            CreatedAt = DateTime.Now
                         };
-                        _context.FactoryProductionLines.Add(newLine);
+                        _context.FactoryLines.Add(newLine);
                     }
                 }
                 _context.SaveChanges();
@@ -211,7 +207,7 @@ namespace PTS_Apparel.Controllers
             }
         }
 
-        // POST: Delete Factory (Master + Details + Production Lines)
+        // POST: Delete Factory (Master + Details + Lines)
         [HttpPost]
         public IActionResult Delete(int id)
         {
@@ -225,30 +221,21 @@ namespace PTS_Apparel.Controllers
 
             try
             {
+                
+                var lines = _context.FactoryLines.Where(l => l.FactoryMasterId == id);
+                _context.FactoryLines.RemoveRange(lines);
+
+                
+                var details = _context.FactoryDetails.Where(d => d.FactoryMasterId == id);
+                _context.FactoryDetails.RemoveRange(details);
+
+                
                 var master = _context.FactoryMasters.Find(id);
                 if (master == null)
                     return Json(new { success = false, message = "Factory not found." });
 
-                // 🚀 පළමුව මේ Factory එකට අයිති Production Lines ටික මකන්න (අතින්)
-                var lines = _context.FactoryProductionLines.Where(l => l.FactoryMasterId == id).ToList();
-                if (lines.Any())
-                {
-                    _context.FactoryProductionLines.RemoveRange(lines);
-                }
-
-                // 🚀 ඊළඟට මේ Factory එකට අයිති Details එක මකන්න (අතින්)
-                var details = _context.FactoryDetails.Where(d => d.FactoryMasterId == id).ToList();
-                if (details.Any())
-                {
-                    _context.FactoryDetails.RemoveRange(details);
-                }
-
-                // 🚀 අන්තිමට Factory Master එක මකන්න
                 _context.FactoryMasters.Remove(master);
-
-                // සියල්ල එක වර Save කරන්න
                 _context.SaveChanges();
-
                 return Json(new { success = true, message = "Factory deleted successfully!" });
             }
             catch (System.Exception ex)
@@ -257,14 +244,15 @@ namespace PTS_Apparel.Controllers
             }
         }
 
-        // GET: Search Factories (AJAX)
+        // GET: Search Factories 
         [HttpGet]
         public IActionResult Search(string searchTerm)
         {
+            List<dynamic> results;
+
             if (string.IsNullOrWhiteSpace(searchTerm))
             {
-                // Search හිස් නම් ඔක්කොම ගන්නවා
-                var all = (from m in _context.FactoryMasters
+                results = (from m in _context.FactoryMasters
                            join d in _context.FactoryDetails on m.Id equals d.FactoryMasterId
                            select new
                            {
@@ -274,11 +262,11 @@ namespace PTS_Apparel.Controllers
                                WorkingHours = d.WorkingHours,
                                CycleTime = d.CycleTime,
                                ProdLines = d.ProdLines
-                           }).ToList();
-                return Json(all);
+                           }).ToList<dynamic>();
             }
-
-            var results = (from m in _context.FactoryMasters
+            else
+            {
+                results = (from m in _context.FactoryMasters
                            join d in _context.FactoryDetails on m.Id equals d.FactoryMasterId
                            where m.FactoryCode.Contains(searchTerm) || m.FactoryName.Contains(searchTerm)
                            select new
@@ -289,8 +277,15 @@ namespace PTS_Apparel.Controllers
                                WorkingHours = d.WorkingHours,
                                CycleTime = d.CycleTime,
                                ProdLines = d.ProdLines
-                           }).ToList();
-            return Json(results);
+                           }).ToList<dynamic>();
+            }
+
+            var jsonOptions = new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = null 
+            };
+
+            return Json(results, jsonOptions);
         }
     }
 }

@@ -29,7 +29,6 @@ namespace PTS_Apparel.Controllers
             ViewBag.CanAdd = perms != null && perms.CanAdd;
             ViewBag.CanEdit = perms != null && perms.CanEdit;
 
-            // 2. Tabs සඳහා Factory Codes ටික FactoryMaster Table එකෙන් ගන්නවා
             var factories = _context.FactoryMasters
                 .Select(f => f.FactoryCode)
                 .Distinct()
@@ -44,7 +43,7 @@ namespace PTS_Apparel.Controllers
             // 3. Base Query
             var query = _context.InputRecorders.AsQueryable();
 
-            // 👇 ප්‍රධාන වෙනස: ViewBag.CurrentFactory dynamic එක string එකක් ලෙස අරගෙන filter කිරීම
+            
             var currentFactory = ViewBag.CurrentFactory as string;
             if (!string.IsNullOrEmpty(currentFactory))
             {

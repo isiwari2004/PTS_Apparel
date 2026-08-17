@@ -14,5 +14,6 @@ namespace PTS_Apparel.Models
         [Display(Name = "Factory Name")]
         [Required(ErrorMessage = "Factory Name is required")]
         public string FactoryName { get; set; }
+        public DateTime CreatedAt { get; set; }
     }
 }
